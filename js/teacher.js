@@ -120,7 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                 <span class="detail-value ${statusClass}">${s.status}</span>
                             </div>
                             <div class="detail-row">
-                                <span class="detail-label">Lần đổi code gần nhất:</span>
+                                <span class="detail-label">Thao tác gần nhất:</span>
                                 <span class="detail-value">${s.lastActive}</span>
                             </div>
                             <div class="detail-row">
@@ -848,10 +848,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     bus.on("STUDENT_TYPING", (payload) => {
         bus.updateStudent(payload.id, {
-            status: "Đang gõ bài...",
-            lastActive: "Vài giây trước",
+            status: "Đang làm bài...",
+            lastActive: "Vừa thao tác",
             liveCode: payload.text,
-            sizeProgress: `${payload.charCount || payload.text.length} kt • ${payload.lineCount || 1} dòng`
+            sizeProgress: payload.progress || `${payload.answeredCount || 1}/6 câu • Đang làm`
         });
 
         // Nếu thầy đang mở modal của học sinh này thì cập nhật live tức thì

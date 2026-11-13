@@ -189,7 +189,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const text = essayTextarea.value;
         const charCount = text.length;
         const lineCount = text ? text.split("\n").length : 0;
-        document.getElementById("charCountDisplay").textContent = `Đang gõ: ${charCount} ký tự • ${lineCount} dòng`;
+        document.getElementById("charCountDisplay").textContent = `Đã nhập: ${charCount} ký tự • ${lineCount} dòng`;
     }
 
     let typingTimer = null;
