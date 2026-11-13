@@ -388,6 +388,15 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("Thầy Nguyễn Vỹ đã mở lại quyền làm bài cho cả lớp!");
     });
 
+    bus.on("STUDENT_ROSTER_UPDATED", () => {
+        const updatedList = bus.getStudents();
+        if (selectStudentUser) {
+            selectStudentUser.innerHTML = updatedList.map(s => `
+                <option value="${s.id}" ${s.id === currentStudentId ? 'selected' : ''}>${s.id} - ${s.name} (${s.class})</option>
+            `).join("");
+        }
+    });
+
     // Khởi tạo
     updateStudentHeader();
 });

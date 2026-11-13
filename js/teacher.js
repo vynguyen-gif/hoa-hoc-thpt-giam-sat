@@ -214,8 +214,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const tbody = document.getElementById("rosterTableBody");
         if (!tbody) return;
         const students = getStudents();
-        tbody.innerHTML = students.map(s => `
+        const currentClass = students.length > 0 ? students[0].class : "12C1";
+        const headerTitle = document.getElementById("rosterTitleHeader");
+        if (headerTitle) {
+            headerTitle.textContent = `Danh Sách Học Sinh Lớp ${currentClass} (Hóa Học KNTT - ${students.length} Học Sinh)`;
+        }
+
+        tbody.innerHTML = students.map((s, idx) => `
             <tr>
+                <td style="color: #64748b; font-weight: 600;">${idx + 1}</td>
                 <td class="id-badge">${s.id}</td>
                 <td style="font-weight: 700;">${s.name}</td>
                 <td>${s.class}</td>
@@ -472,11 +479,324 @@ document.addEventListener("DOMContentLoaded", () => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `Bang_Diem_Hoa12_Lop12C1_${new Date().toISOString().slice(0, 10)}.csv`;
+        const currentClass = students.length > 0 ? students[0].class : "12C1";
+        a.download = `Bang_Diem_Hoa12_Lop_${currentClass}_${new Date().toISOString().slice(0, 10)}.csv`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
     });
+
+    // 13. Tải Danh Sách Lớp (Export Student Roster)
+    const btnExportStudentRoster = document.getElementById("btnExportStudentRoster");
+    if (btnExportStudentRoster) {
+        btnExportStudentRoster.addEventListener("click", () => {
+            const students = getStudents();
+            let csvContent = "\uFEFF"; // UTF-8 BOM
+            csvContent += "STT,Mã ID 4 Số,Họ và tên học sinh,Lớp,Trạng thái,Chỉ số liêm chính,Điểm trung bình\n";
+
+            students.forEach((s, idx) => {
+                const row = [
+                    idx + 1,
+                    `"${s.id}"`,
+                    `"${s.name}"`,
+                    `"${s.class}"`,
+                    `"${s.online ? 'Đang hoạt động' : 'Ngoại tuyến'}"`,
+                    `"${s.integrity}%"`,
+                    `"${s.score !== null ? s.score : ''}"`
+                ];
+                csvContent += row.join(",") + "\n";
+            });
+
+            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            const currentClass = students.length > 0 ? students[0].class : "12C1";
+            a.download = `Danh_Sach_Hoc_Sinh_Lop_${currentClass}_${new Date().toISOString().slice(0, 10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+    }
+
+    // 14. Tải File Mẫu Excel để Giáo Viên điền vào
+    const btnDownloadTemplate = document.getElementById("btnDownloadTemplate");
+    if (btnDownloadTemplate) {
+        btnDownloadTemplate.addEventListener("click", () => {
+            let csvContent = "\uFEFF"; // UTF-8 BOM
+            csvContent += "STT,Mã ID,Họ và tên,Lớp\n";
+            csvContent += "1,2101,Nguyễn Văn An,12A1\n";
+            csvContent += "2,2102,Trần Thị Bích,12A1\n";
+            csvContent += "3,2103,Lê Hoàng Long,12A1\n";
+
+            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "Mau_Danh_Sach_Hoc_Sinh_Hoa12.csv";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+    }
+
+    // 15. Quản lý Modal Nhập Danh Sách Học Sinh (Import Modal)
+    let parsedImportStudents = [];
+
+    const importModal = document.getElementById("importRosterModal");
+    const btnOpenImportModal = document.getElementById("btnOpenImportModal");
+    const importModalCloseBtn = document.getElementById("importModalCloseBtn");
+    const importModalCancelBtn = document.getElementById("importModalCancelBtn");
+
+    if (btnOpenImportModal) {
+        btnOpenImportModal.addEventListener("click", () => {
+            parsedImportStudents = [];
+            document.getElementById("importPreviewBox").style.display = "none";
+            document.getElementById("selectedFileName").textContent = "Chưa chọn file nào";
+            document.getElementById("pasteStudentTextarea").value = "";
+            importModal.classList.add("active");
+        });
+    }
+
+    function closeImportModal() {
+        if (importModal) importModal.classList.remove("active");
+    }
+
+    if (importModalCloseBtn) importModalCloseBtn.addEventListener("click", closeImportModal);
+    if (importModalCancelBtn) importModalCancelBtn.addEventListener("click", closeImportModal);
+
+    // Tab chuyển giữa Upload file và Paste text
+    const tabChooseFile = document.getElementById("tabChooseFile");
+    const tabChoosePaste = document.getElementById("tabChoosePaste");
+    const sectionFileUpload = document.getElementById("sectionFileUpload");
+    const sectionPasteText = document.getElementById("sectionPasteText");
+
+    if (tabChooseFile && tabChoosePaste) {
+        tabChooseFile.addEventListener("click", () => {
+            tabChooseFile.style.background = "#e0f2fe";
+            tabChooseFile.style.color = "#0284c7";
+            tabChooseFile.style.borderColor = "#0284c7";
+            tabChoosePaste.style.background = "var(--bg-page)";
+            tabChoosePaste.style.color = "var(--text-main)";
+            tabChoosePaste.style.borderColor = "var(--border-color)";
+            sectionFileUpload.style.display = "block";
+            sectionPasteText.style.display = "none";
+        });
+
+        tabChoosePaste.addEventListener("click", () => {
+            tabChoosePaste.style.background = "#e0f2fe";
+            tabChoosePaste.style.color = "#0284c7";
+            tabChoosePaste.style.borderColor = "#0284c7";
+            tabChooseFile.style.background = "var(--bg-page)";
+            tabChooseFile.style.color = "var(--text-main)";
+            tabChooseFile.style.borderColor = "var(--border-color)";
+            sectionFileUpload.style.display = "none";
+            sectionPasteText.style.display = "block";
+        });
+    }
+
+    // Xử lý đọc File Excel (.xlsx, .xls, .csv)
+    const excelFileInput = document.getElementById("excelFileInput");
+    if (excelFileInput) {
+        excelFileInput.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            document.getElementById("selectedFileName").textContent = `📁 Đang chọn: ${file.name} (${Math.round(file.size / 1024)} KB)`;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const data = new Uint8Array(evt.target.result);
+                    const workbook = XLSX.read(data, { type: "array" });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                    processImportRows(rows);
+                } catch (err) {
+                    console.error("Lỗi đọc file Excel:", err);
+                    alert("Không thể đọc file Excel này! Vui lòng kiểm tra định dạng .xlsx hoặc .csv.");
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        });
+    }
+
+    // Xử lý dán văn bản (Paste Text)
+    const pasteStudentTextarea = document.getElementById("pasteStudentTextarea");
+    if (pasteStudentTextarea) {
+        pasteStudentTextarea.addEventListener("input", () => {
+            const text = pasteStudentTextarea.value.trim();
+            if (!text) {
+                document.getElementById("importPreviewBox").style.display = "none";
+                parsedImportStudents = [];
+                return;
+            }
+
+            const lines = text.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+            const className = document.getElementById("importClassName").value.trim() || "12C1";
+            let startId = parseInt(document.getElementById("importStartId").value.trim()) || 2101;
+
+            parsedImportStudents = lines.map((line, idx) => {
+                // Tách nếu dòng có dạng "1. Nguyễn Văn A" hoặc "2101 \t Nguyễn Văn A"
+                let name = line.replace(/^[0-9]+[\.\-\:\t\s]+/, "").trim();
+                let id = String(startId + idx);
+
+                // Nếu trong dòng có tab hoặc dấu phẩy phân cách ID và Tên
+                if (line.includes("\t") || line.includes(",")) {
+                    const parts = line.split(/[\t,]/).map(p => p.trim());
+                    if (parts.length >= 2) {
+                        if (/^[0-9]{3,6}$/.test(parts[0])) {
+                            id = parts[0];
+                            name = parts[1];
+                        } else {
+                            name = parts[0];
+                        }
+                    }
+                }
+
+                return createStudentObject(id, name, className);
+            });
+
+            showImportPreview(parsedImportStudents);
+        });
+    }
+
+    function processImportRows(rows) {
+        if (!rows || rows.length === 0) {
+            alert("File Excel trống!");
+            return;
+        }
+
+        // Tìm dòng tiêu đề
+        let headerRowIndex = 0;
+        let colNameIdx = -1;
+        let colIdIdx = -1;
+        let colClassIdx = -1;
+
+        for (let r = 0; r < Math.min(10, rows.length); r++) {
+            const row = rows[r];
+            if (!Array.isArray(row)) continue;
+            for (let c = 0; c < row.length; c++) {
+                const cell = String(row[c] || "").toLowerCase().trim();
+                if (cell.includes("họ và tên") || cell.includes("họ tên") || cell === "tên" || cell === "name") colNameIdx = c;
+                if (cell.includes("mã") || cell.includes("id") || cell.includes("sbd") || cell.includes("số báo danh")) colIdIdx = c;
+                if (cell.includes("lớp") || cell.includes("class")) colClassIdx = c;
+            }
+            if (colNameIdx !== -1) {
+                headerRowIndex = r;
+                break;
+            }
+        }
+
+        // Nếu không tìm thấy cột có tên rõ ràng, mặc định cột 1 hoặc 2 là Họ Tên
+        if (colNameIdx === -1) {
+            colNameIdx = rows[0].length > 1 ? 1 : 0;
+            headerRowIndex = 0;
+        }
+
+        const className = document.getElementById("importClassName").value.trim() || "12C1";
+        let startId = parseInt(document.getElementById("importStartId").value.trim()) || 2101;
+        parsedImportStudents = [];
+
+        for (let r = headerRowIndex + 1; r < rows.length; r++) {
+            const row = rows[r];
+            if (!row || !row[colNameIdx]) continue;
+            const name = String(row[colNameIdx]).trim();
+            if (!name || name === "undefined") continue;
+
+            let id = (colIdIdx !== -1 && row[colIdIdx]) ? String(row[colIdIdx]).trim() : String(startId + parsedImportStudents.length);
+            let sClass = (colClassIdx !== -1 && row[colClassIdx]) ? String(row[colClassIdx]).trim() : className;
+
+            parsedImportStudents.push(createStudentObject(id, name, sClass));
+        }
+
+        showImportPreview(parsedImportStudents);
+    }
+
+    function createStudentObject(id, name, className) {
+        return {
+            id: String(id),
+            name: name,
+            class: className,
+            online: false,
+            assignment: "KT thực hành 12c2",
+            warningType: "none",
+            warningText: "",
+            status: "Chưa tham gia",
+            lastActive: "--",
+            integrity: 100,
+            leaveCount: 0,
+            submitted: false,
+            submitTime: "--",
+            sizeProgress: "0 kt • 0 dòng",
+            graded: false,
+            score: null,
+            feedback: "Chưa nộp bài.",
+            liveCode: "",
+            answers: {},
+            leaveHistory: []
+        };
+    }
+
+    function showImportPreview(list) {
+        const previewBox = document.getElementById("importPreviewBox");
+        const countSpan = document.getElementById("previewCount");
+        const sampleDiv = document.getElementById("previewSampleList");
+
+        if (!list || list.length === 0) {
+            previewBox.style.display = "none";
+            return;
+        }
+
+        previewBox.style.display = "block";
+        countSpan.textContent = list.length;
+
+        const sample = list.slice(0, 5).map(s => `• <strong>${s.id}</strong>: ${s.name} (Lớp: ${s.class})`).join("<br>");
+        sampleDiv.innerHTML = sample + (list.length > 5 ? `<br><em>... và ${list.length - 5} học sinh khác.</em>` : "");
+    }
+
+    // Xác nhận cập nhật danh sách học sinh vào hệ thống
+    const btnConfirmImportRoster = document.getElementById("btnConfirmImportRoster");
+    if (btnConfirmImportRoster) {
+        btnConfirmImportRoster.addEventListener("click", () => {
+            if (!parsedImportStudents || parsedImportStudents.length === 0) {
+                alert("Chưa có danh sách học sinh nào được đọc! Vui lòng chọn file Excel hoặc dán danh sách tên học sinh.");
+                return;
+            }
+
+            const targetClass = parsedImportStudents[0].class || "12C1";
+
+            // Cập nhật danh sách mới
+            bus.saveStudents(parsedImportStudents);
+
+            // Cập nhật bộ chọn lớp nếu có
+            const selectClassFilter = document.getElementById("selectClassFilter");
+            if (selectClassFilter) {
+                let hasOption = false;
+                for (let i = 0; i < selectClassFilter.options.length; i++) {
+                    if (selectClassFilter.options[i].value === targetClass) hasOption = true;
+                }
+                if (!hasOption) {
+                    const opt = document.createElement("option");
+                    opt.value = targetClass;
+                    opt.textContent = targetClass;
+                    selectClassFilter.appendChild(opt);
+                }
+                selectClassFilter.value = targetClass;
+            }
+
+            bus.send("STUDENT_ROSTER_UPDATED", {
+                count: parsedImportStudents.length,
+                class: targetClass
+            });
+
+            closeImportModal();
+            refreshAllViews();
+            alert(`🎉 Chúc mừng Thầy Vỹ! Đã cập nhật thành công danh sách Lớp ${targetClass} gồm ${parsedImportStudents.length} học sinh vào hệ thống!`);
+        });
+    }
 
     // Reset mô phỏng về trạng thái gốc của 2 ảnh
     document.getElementById("btnResetSimulation").addEventListener("click", () => {

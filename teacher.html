@@ -222,11 +222,11 @@
             <div class="table-view-section">
                 <div class="table-top-actions">
                     <div>
-                        <h3 style="font-size: 18px; font-weight: 700; color: #1e293b;">Danh Sách Học Sinh Lớp 12C1 (Hóa Học KNTT)</h3>
+                        <h3 style="font-size: 18px; font-weight: 700; color: #1e293b;" id="rosterTitleHeader">Danh Sách Học Sinh Lớp 12C1 (Hóa Học KNTT)</h3>
                         <p style="font-size: 13px; color: #64748b; margin-top: 4px;">Quản lý mã định danh 4 số, tài khoản phòng máy và lịch sử điểm số thực nghiệm Hóa học.</p>
                     </div>
                     <div class="table-action-buttons">
-                        <button type="button" class="btn-table-action" onclick="alert('Tính năng nhập file Excel danh sách học sinh: Chọn file .xlsx hoặc .csv')">
+                        <button type="button" class="btn-table-action" id="btnOpenImportModal">
                             <i class="fa-solid fa-file-excel" style="color: #16a34a;"></i> Nhập Excel Học Sinh
                         </button>
                         <button type="button" class="btn-table-action btn-export-excel" id="btnExportStudentRoster">
@@ -239,6 +239,7 @@
                     <table class="custom-chem-table">
                         <thead>
                             <tr>
+                                <th>STT</th>
                                 <th>MÃ ID 4 SỐ</th>
                                 <th>HỌ VÀ TÊN HỌC SINH</th>
                                 <th>LỚP</th>
@@ -248,6 +249,12 @@
                             </tr>
                         </thead>
                         <tbody id="rosterTableBody">
+                            <!-- Render JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
                             <!-- Render JS -->
                         </tbody>
                     </table>
@@ -384,7 +391,105 @@
         </div>
     </div>
 
+    <!-- ==========================================================================
+         MODAL NHẬP EXCEL HOẶC DÁN DANH SÁCH HỌC SINH CỦA THẦY VỸ
+         ========================================================================== -->
+    <div class="modal-overlay" id="importRosterModal">
+        <div class="modal-dialog" style="max-width: 780px;">
+            <div class="modal-header">
+                <div class="modal-header-left">
+                    <div class="teacher-avatar-icon" style="width: 38px; height: 38px; font-size: 18px; background: #16a34a;">
+                        <i class="fa-solid fa-file-excel"></i>
+                    </div>
+                    <div>
+                        <div class="modal-header-title">Nhập Danh Sách Học Sinh Của Bạn</div>
+                        <div style="font-size: 12px; color: #64748b;">Hỗ trợ tải lên file Excel (.xlsx, .xls, .csv) hoặc Dán danh sách tên học sinh</div>
+                    </div>
+                </div>
+                <button type="button" class="modal-close-btn" id="importModalCloseBtn">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Chọn Lớp & Tên Lớp Mới -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                    <div>
+                        <label style="font-size: 12.5px; font-weight: 700; color: #1e293b; display: block; margin-bottom: 6px;">Tên Lớp:</label>
+                        <input type="text" id="importClassName" value="12C1" placeholder="Ví dụ: 12A1, 12A2, 12C1..."
+                            style="width: 100%; padding: 10px 14px; border-radius: 12px; border: 1px solid #cbd5e1; font-size: 13.5px; font-weight: 700;">
+                    </div>
+                    <div>
+                        <label style="font-size: 12.5px; font-weight: 700; color: #1e293b; display: block; margin-bottom: 6px;">Mã bắt đầu (Nếu tự tạo ID 4 số):</label>
+                        <input type="number" id="importStartId" value="2101" placeholder="2101"
+                            style="width: 100%; padding: 10px 14px; border-radius: 12px; border: 1px solid #cbd5e1; font-size: 13.5px; font-weight: 700;">
+                    </div>
+                </div>
+
+                <!-- Tab chọn phương thức nhập: Tải file hoặc Dán văn bản -->
+                <div style="display: flex; gap: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin-top: 6px;">
+                    <button type="button" class="btn-table-action" id="tabChooseFile" style="background: #e0f2fe; color: #0284c7; border-color: #0284c7;">
+                        <i class="fa-solid fa-file-arrow-up"></i> Tải File Excel (.xlsx / .csv)
+                    </button>
+                    <button type="button" class="btn-table-action" id="tabChoosePaste">
+                        <i class="fa-solid fa-paste"></i> Dán Trực Tiếp Danh Sách Tên
+                    </button>
+                </div>
+
+                <!-- Khu vực 1: Upload File -->
+                <div id="sectionFileUpload" style="display: block;">
+                    <div style="border: 2px dashed #0284c7; background: #f0f9ff; border-radius: 16px; padding: 28px; text-align: center; cursor: pointer;"
+                        id="dropZoneExcel" onclick="document.getElementById('excelFileInput').click()">
+                        <i class="fa-solid fa-cloud-arrow-up" style="font-size: 40px; color: #0284c7; margin-bottom: 10px;"></i>
+                        <h4 style="font-size: 15px; font-weight: 700; color: #0369a1; margin-bottom: 4px;">Bấm vào đây để chọn file Excel hoặc Kéo thả file vào</h4>
+                        <p style="font-size: 12.5px; color: #64748b;">Hỗ trợ định dạng: .xlsx, .xls, .csv. Tự động nhận diện cột Họ Tên, Mã ID, Lớp.</p>
+                        <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" style="display: none;">
+                    </div>
+                    <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+                        <span id="selectedFileName" style="font-size: 12.5px; font-weight: 600; color: #16a34a;">Chưa chọn file nào</span>
+                        <button type="button" class="btn-table-action" id="btnDownloadTemplate" style="font-size: 12px; padding: 4px 10px;">
+                            <i class="fa-solid fa-download"></i> Tải File Mẫu Excel
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Khu vực 2: Dán trực tiếp danh sách -->
+                <div id="sectionPasteText" style="display: none;">
+                    <label style="font-size: 12.5px; font-weight: 700; color: #1e293b; display: block; margin-bottom: 6px;">
+                        Dán danh sách học sinh (Mỗi bạn 1 dòng từ Word/Excel/Zalo):
+                    </label>
+                    <textarea id="pasteStudentTextarea" class="chem-textarea" style="min-height: 160px; font-family: inherit;"
+                        placeholder="Ví dụ dán vào:
+Nguyễn Văn An
+Trần Thị Bích
+Lê Hoàng Long
+Phạm Quốc Đạt..."></textarea>
+                    <span style="font-size: 12px; color: #64748b; margin-top: 4px; display: block;">
+                        Hệ thống sẽ tự động gán mã ID 4 số tăng dần và lớp tương ứng.
+                    </span>
+                </div>
+
+                <!-- Bảng Preview Kết Quả Nhận Diện -->
+                <div id="importPreviewBox" style="display: none; background: #f8fafc; border-radius: 14px; padding: 14px; border: 1px solid #e2e8f0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 13px; font-weight: 700; color: #16a34a;">
+                            <i class="fa-solid fa-check-circle"></i> Đã nhận diện: <span id="previewCount">0</span> học sinh
+                        </span>
+                        <span style="font-size: 12px; color: #64748b;">Xem trước 5 học sinh đầu:</span>
+                    </div>
+                    <div id="previewSampleList" style="font-size: 12.5px; color: #334155; line-height: 1.6;"></div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-table-action" id="importModalCancelBtn">Hủy</button>
+                <button type="button" class="btn-pill-action active-voice" id="btnConfirmImportRoster" style="background: #16a34a; border-color: #16a34a;">
+                    <i class="fa-solid fa-check"></i> Cập Nhật Danh Sách Vào Hệ Thống
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="js/data.js"></script>
     <script src="js/channel.js"></script>
     <script src="js/teacher.js"></script>
