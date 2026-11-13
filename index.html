@@ -29,6 +29,14 @@
         </div>
         <div class="flex items-center gap-2">
             <span class="text-slate-400 text-[11px] hidden md:inline">Chế độ xem:</span>
+            <a href="giao-vien-import.html" class="px-2.5 py-1 rounded bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 font-medium flex items-center gap-1 transition border border-indigo-500/30">
+                <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
+                <span>Import Excel (GV)</span>
+            </a>
+            <a href="dang-nhap-hoc-sinh.html" class="px-2.5 py-1 rounded bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 font-medium flex items-center gap-1 transition border border-emerald-500/30">
+                <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
+                <span>Đăng nhập Học sinh</span>
+            </a>
             <button id="btn-role-student" onclick="window.appRouter.showRole('student')" 
                 class="px-2.5 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white font-medium flex items-center gap-1 transition">
                 <i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i>
@@ -79,18 +87,29 @@
 
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-                            Số Báo Danh (SBD) / Mã Học Sinh
+                            Số Báo Danh (SBD) Thí Sinh
                         </label>
                         <input type="text" id="student-sbd-input" value="11A101" placeholder="Ví dụ: 11A101" required
-                            class="w-full py-2.5 px-3.5 rounded-xl border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-sm font-medium uppercase transition">
+                            class="w-full py-2.5 px-3.5 rounded-xl border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-sm font-bold uppercase transition font-mono">
                     </div>
 
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-                            Họ và Tên Thí Sinh
+                            Mật Khẩu Riêng Của Thí Sinh
                         </label>
-                        <input type="text" id="student-name-input" value="Nguyễn Minh An" placeholder="Nhập họ tên đầy đủ"
-                            class="w-full py-2.5 px-3.5 rounded-xl border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-sm font-medium transition">
+                        <div class="relative">
+                            <input type="text" id="student-pass-input" value="An908" placeholder="Nhập mật khẩu riêng (VD: An908)" required
+                                class="w-full py-2.5 px-3.5 rounded-xl border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-sm font-semibold transition font-mono">
+                            <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-mono">Mẫu 11A101: An908</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                            Họ và Tên Thí Sinh (Tự nhận diện theo SBD)
+                        </label>
+                        <input type="text" id="student-name-input" value="Nguyễn Minh An" placeholder="Tự động nhận diện" readonly
+                            class="w-full py-2.5 px-3.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 text-sm font-semibold cursor-not-allowed">
                     </div>
 
                     <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-800 space-y-1">

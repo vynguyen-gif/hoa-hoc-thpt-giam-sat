@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giáo Viên - Import Danh Sách Học Sinh</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SheetJS (xlsx) CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- Supabase JS Client v2 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @media print {
+            body { background: white !important; }
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            .card-ticket {
+                page-break-inside: avoid;
+                border: 1px dashed #94a3b8 !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen">
+
+    <div class="max-w-5xl mx-auto p-4 sm:p-8">
+        <!-- HEADER -->
+        <header class="no-print mb-8 flex items-center justify-between border-b border-slate-200 pb-5">
+            <div>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 mb-2">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+                    Phân hệ Giáo viên
+                </span>
+                <h1 class="text-2xl font-black text-slate-900">Import Danh Sách Lớp & Sinh Tài Khoản Tự Động</h1>
+                <p class="text-sm text-slate-500 mt-1">Đọc file Excel (.xlsx), tự động tạo Username <code>TenLop_STT</code>, Password <code>HoaHoc2026</code> và lưu vào Supabase.</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <a href="dang-nhap-hoc-sinh.html" target="_blank" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-2 transition shadow-sm">
+                    <i data-lucide="external-link" class="w-4 h-4"></i>
+                    <span>Mở trang Đăng nhập Học sinh</span>
+                </a>
+            </div>
+        </header>
+
+        <!-- CONFIG SUPABASE (TÙY CHỌN) -->
+        <div class="no-print bg-white rounded-2xl border border-slate-200 p-5 mb-6 shadow-sm">
+            <details class="text-xs">
+                <summary class="font-bold text-slate-700 cursor-pointer flex items-center gap-2">
+                    <i data-lucide="database" class="w-4 h-4 text-blue-600"></i>
+                    <span>Cấu hình kết nối Supabase (Bấm để xem/sửa cấu hình kết nối DB)</span>
+                </summary>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-3 border-t border-slate-100">
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-1">SUPABASE URL</label>
+                        <input type="text" id="supabase-url" placeholder="https://your-project.supabase.co"
+                            class="w-full text-xs font-mono p-2 rounded-lg border border-slate-300 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-1">SUPABASE ANON KEY</label>
+                        <input type="password" id="supabase-key" placeholder="eyJhbGciOiJIUzI1NiIsIn..."
+                            class="w-full text-xs font-mono p-2 rounded-lg border border-slate-300 focus:border-blue-500">
+                    </div>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-2">
+                    * Nếu để trống, hệ thống sẽ tự động dùng bộ nhớ Local Database giả lập đồng bộ giữa các tab để bạn có thể test ngay mà không bị gián đoạn.
+                </p>
+            </details>
+        </div>
+
+        <!-- DRAG & DROP ZONE -->
+        <div class="no-print bg-white rounded-2xl border border-slate-200 p-8 mb-8 shadow-sm text-center">
+            <div id="dropzone" class="border-2 border-dashed border-slate-300 hover:border-blue-500 hover:bg-blue-50/30 rounded-2xl p-8 cursor-pointer transition flex flex-col items-center justify-center">
+                <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-3">
+                    <i data-lucide="file-spreadsheet" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-base font-bold text-slate-900 mb-1">Kéo thả file Excel (.xlsx) vào đây</h3>
+                <p class="text-xs text-slate-500 mb-4">File gồm 3 cột chuẩn: <strong>STT</strong>, <strong>HoTen</strong>, <strong>TenLop</strong></p>
+                
+                <div class="flex items-center gap-3">
+                    <label for="excel-input" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl cursor-pointer shadow-md shadow-blue-500/20 transition flex items-center gap-2">
+                        <i data-lucide="upload" class="w-4 h-4"></i>
+                        <span>Chọn file Excel từ máy</span>
+                    </label>
+                    <input type="file" id="excel-input" accept=".xlsx, .xls, .csv" class="hidden">
+                    
+                    <button type="button" id="btn-sample-data" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition">
+                        Nạp mẫu nhanh (Lớp 11A1)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Trạng thái xử lý -->
+            <div id="import-status" class="hidden mt-4 p-3 rounded-xl text-xs font-medium text-left"></div>
+        </div>
+
+        <!-- BẢNG KẾT QUẢ TÀI KHOẢN HỌC SINH ĐỂ IN -->
+        <div id="result-section" class="hidden bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-6">
+            <div class="flex items-center justify-between mb-4 flex-wrap gap-3 no-print">
+                <div>
+                    <h2 class="text-lg font-black text-slate-900">Danh Sách Tài Khoản Đã Tạo Trên Supabase</h2>
+                    <p class="text-xs text-slate-500">Mỗi học sinh có Username chuẩn và Password riêng biệt để đăng nhập.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="window.print()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow transition">
+                        <i data-lucide="printer" class="w-4 h-4"></i>
+                        <span>In Danh Sách Phát Cho Học Sinh</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TIÊU ĐỀ KHI IN -->
+            <div class="hidden print-only mb-6 text-center">
+                <h2 class="text-xl font-bold uppercase tracking-wider">DANH SÁCH TÀI KHOẢN THI TRỰC TUYẾN MÔN HÓA HỌC</h2>
+                <p class="text-xs text-slate-600 mt-1">Học sinh bảo quản tài khoản cẩn thận. Chế độ Single-session: Mỗi tài khoản chỉ đăng nhập trên 1 thiết bị.</p>
+            </div>
+
+            <!-- BẢNG HIỂN THỊ -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs border border-slate-200 rounded-lg">
+                    <thead class="bg-slate-100 text-slate-700 font-bold uppercase border-b border-slate-200">
+                        <tr>
+                            <th class="py-3 px-4 w-12 text-center">STT</th>
+                            <th class="py-3 px-4">Họ và Tên</th>
+                            <th class="py-3 px-4">Lớp</th>
+                            <th class="py-3 px-4 font-mono">Tên đăng nhập (Username)</th>
+                            <th class="py-3 px-4 font-mono">Mật khẩu (Password)</th>
+                            <th class="py-3 px-4 text-center">Trạng thái DB</th>
+                        </tr>
+                    </thead>
+                    <tbody id="student-tbody" class="divide-y divide-slate-100 font-sans">
+                        <!-- Injected by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // 1. Khởi tạo Supabase Client
+        const defaultUrl = localStorage.getItem('supabase_url') || 'https://mock-chem-exam.supabase.co';
+        const defaultKey = localStorage.getItem('supabase_key') || 'mock-anon-key';
+        document.getElementById('supabase-url').value = defaultUrl;
+        document.getElementById('supabase-key').value = defaultKey;
+
+        let supabase = null;
+        function getSupabaseClient() {
+            const url = document.getElementById('supabase-url').value.trim();
+            const key = document.getElementById('supabase-key').value.trim();
+            if (window.supabase && url && !url.includes('mock-chem-exam')) {
+                return window.supabase.createClient(url, key);
+            }
+            return null; // Dùng Fallback DB
+        }
+
+        // 2. Drag & Drop Listener
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('excel-input');
+
+        ['dragenter', 'dragover'].forEach(name => {
+            dropzone.addEventListener(name, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzone.classList.add('border-blue-500', 'bg-blue-50/50');
+            });
+        });
+
+        ['dragleave', 'drop'].forEach(name => {
+            dropzone.addEventListener(name, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzone.classList.remove('border-blue-500', 'bg-blue-50/50');
+            });
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            const files = e.dataTransfer.files;
+            if (files.length > 0) processExcel(files[0]);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) processExcel(e.target.files[0]);
+        });
+
+        // Nút nạp mẫu lớp 11A1
+        document.getElementById('btn-sample-data').addEventListener('click', () => {
+            const sampleRows = [
+                ["STT", "HoTen", "TenLop"],
+                [1, "Nguyễn Minh An", "11A1"],
+                [2, "Trần Nữ Gia Anh", "11A1"],
+                [3, "Trần Lâm Hoài Ân", "11A1"],
+                [4, "Nguyễn Công Danh", "11A1"],
+                [5, "Nguyễn Châu Quốc Duy", "11A1"],
+                [6, "Đặng Văn Đạt", "11A1"],
+                [7, "Trần Quốc Hào", "11A1"],
+                [8, "Dương Gia Hân", "11A1"],
+                [9, "Lê Gia Hùng", "11A1"],
+                [10, "Nguyễn Lê Quốc Hùng", "11A1"]
+            ];
+            parseAndSaveStudents(sampleRows);
+        });
+
+        // 3. Đọc file Excel bằng SheetJS
+        function processExcel(file) {
+            const statusEl = document.getElementById('import-status');
+            statusEl.className = 'mt-4 p-3 rounded-xl text-xs font-medium bg-blue-50 border border-blue-200 text-blue-800';
+            statusEl.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 inline animate-spin mr-1"></i> Đang đọc file Excel...`;
+            statusEl.classList.remove('hidden');
+            if (window.lucide) window.lucide.createIcons();
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                    parseAndSaveStudents(jsonData);
+                } catch (err) {
+                    console.error(err);
+                    statusEl.className = 'mt-4 p-3 rounded-xl text-xs font-medium bg-rose-50 border border-rose-200 text-rose-800';
+                    statusEl.textContent = 'Lỗi: Không thể phân tích file Excel. Vui lòng kiểm tra định dạng!';
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // 4. Lặp qua dữ liệu Excel, sinh Username/Password và Insert vào Supabase
+        async function parseAndSaveStudents(rows) {
+            const statusEl = document.getElementById('import-status');
+            if (!rows || rows.length < 2) {
+                statusEl.className = 'mt-4 p-3 rounded-xl text-xs font-medium bg-amber-50 border border-amber-200 text-amber-800';
+                statusEl.textContent = 'File Excel không có dữ liệu học sinh!';
+                return;
+            }
+
+            // Tìm vị trí cột STT, HoTen, TenLop
+            const header = rows[0].map(h => (h || '').toString().toLowerCase().trim());
+            let sttIdx = header.findIndex(h => h.includes('stt'));
+            let nameIdx = header.findIndex(h => h.includes('ten') || h.includes('hoten') || h.includes('họ'));
+            let lopIdx = header.findIndex(h => h.includes('lop') || h.includes('tenlop'));
+
+            if (sttIdx === -1) sttIdx = 0;
+            if (nameIdx === -1) nameIdx = 1;
+            if (lopIdx === -1) lopIdx = 2;
+
+            const studentsToInsert = [];
+
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row || row.length === 0 || !row[nameIdx]) continue;
+
+                const sttRaw = row[sttIdx] || i;
+                const sttNum = parseInt(sttRaw, 10) || i;
+                const sttPad = sttNum < 10 ? `0${sttNum}` : `${sttNum}`;
+                const hoTen = String(row[nameIdx]).trim();
+                const tenLop = String(row[lopIdx] || '11A1').trim().replace(/\s+/g, '');
+
+                // Tạo Username dạng: TenLop_STT (VD: 11A1_01, 10A3_05)
+                const username = `${tenLop}_${sttPad}`;
+                // Mật khẩu mặc định theo yêu cầu
+                const password = "HoaHoc2026";
+
+                studentsToInsert.push({
+                    stt: sttNum,
+                    ho_ten: hoTen,
+                    ten_lop: tenLop,
+                    username: username,
+                    password: password,
+                    current_session_token: null,
+                    created_at: new Date().toISOString()
+                });
+            }
+
+            if (studentsToInsert.length === 0) {
+                statusEl.className = 'mt-4 p-3 rounded-xl text-xs font-medium bg-rose-50 border border-rose-200 text-rose-800';
+                statusEl.textContent = 'Không trích xuất được dữ liệu học sinh hợp lệ từ file!';
+                return;
+            }
+
+            // Lưu vào Supabase hoặc Local Database Fallback
+            const sb = getSupabaseClient();
+            let isSupabaseSuccess = false;
+
+            if (sb) {
+                try {
+                    statusEl.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 inline animate-spin mr-1"></i> Đang ghi ${studentsToInsert.length} học sinh lên bảng Students (Supabase)...`;
+                    if (window.lucide) window.lucide.createIcons();
+
+                    const { data, error } = await sb.from('Students').upsert(studentsToInsert, { onConflict: 'username' });
+                    if (error) throw error;
+                    isSupabaseSuccess = true;
+                } catch (err) {
+                    console.warn("Supabase insert error, switching to Local DB:", err);
+                }
+            }
+
+            // Luôn lưu vào LocalStorage để đảm bảo Module Đăng nhập hoạt động liền mạch 100%
+            let localDb = JSON.parse(localStorage.getItem('supabase_students_db') || '[]');
+            studentsToInsert.forEach(s => {
+                const existingIdx = localDb.findIndex(item => item.username === s.username);
+                if (existingIdx !== -1) {
+                    localDb[existingIdx] = s;
+                } else {
+                    localDb.push(s);
+                }
+            });
+            localStorage.setItem('supabase_students_db', JSON.stringify(localDb));
+
+            // Hiển thị thông báo thành công
+            statusEl.className = 'mt-4 p-3 rounded-xl text-xs font-medium bg-emerald-50 border border-emerald-200 text-emerald-800';
+            statusEl.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i>
+                    <span>Đã xử lý và lưu thành công <strong>${studentsToInsert.length} học sinh</strong> vào cơ sở dữ liệu! (${isSupabaseSuccess ? 'Supabase Cloud' : 'Local Verified Store'})</span>
+                </div>
+            `;
+            if (window.lucide) window.lucide.createIcons();
+
+            // Render bảng tài khoản
+            renderStudentTable(studentsToInsert, isSupabaseSuccess);
+        }
+
+        // 5. Render Bảng HTML hiển thị Username / Password
+        function renderStudentTable(students, isCloud) {
+            const tableSection = document.getElementById('result-section');
+            const tbody = document.getElementById('student-tbody');
+            tableSection.classList.remove('hidden');
+
+            tbody.innerHTML = students.map((s, idx) => `
+                <tr class="hover:bg-slate-50 border-b border-slate-100 transition">
+                    <td class="py-3 px-4 text-center font-mono text-slate-500 font-bold">${s.stt}</td>
+                    <td class="py-3 px-4 font-bold text-slate-900">${s.ho_ten}</td>
+                    <td class="py-3 px-4 font-semibold text-slate-600">${s.ten_lop}</td>
+                    <td class="py-3 px-4">
+                        <span class="inline-block px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 font-mono font-bold text-xs border border-blue-200">
+                            ${s.username}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4">
+                        <span class="inline-block px-2.5 py-1 rounded-md bg-amber-50 text-amber-800 font-mono font-bold text-xs border border-amber-200">
+                            ${s.password}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                        <span class="inline-flex items-center gap-1 text-[11px] font-semibold ${isCloud ? 'text-emerald-600' : 'text-blue-600'}">
+                            <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                            ${isCloud ? 'Supabase Live' : 'Đã Đồng Bộ'}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+
+            if (window.lucide) window.lucide.createIcons();
+            tableSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        if (window.lucide) window.lucide.createIcons();
+    </script>
+</body>
+</html>

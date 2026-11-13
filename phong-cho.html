@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phòng Chờ Thi - Hóa Học THPT (CV 7991)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS Client v2 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 text-slate-100 min-h-screen flex flex-col justify-between p-4 sm:p-8">
+
+    <!-- TOP HEADER PHÒNG CHỜ -->
+    <header class="max-w-4xl w-full mx-auto flex items-center justify-between pb-6 border-b border-slate-700/60">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-lg shadow-blue-500/30">
+                <i data-lucide="flask-conical" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <h1 class="text-base sm:text-lg font-black text-white tracking-wide">PHÒNG CHỜ THI TRỰC TUYẾN</h1>
+                <p class="text-xs text-slate-400">Đề thi đánh giá định kỳ Hóa học (Công văn 7991)</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700 text-xs">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="text-slate-300">Phiên thi: <strong>Active</strong></span>
+            </div>
+            <button onclick="logoutStudent()" class="px-3 py-1.5 rounded-lg bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 text-xs font-semibold transition">
+                Đăng xuất
+            </button>
+        </div>
+    </header>
+
+    <!-- NỘI DUNG CHÍNH -->
+    <main class="max-w-4xl w-full mx-auto my-auto py-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+            <!-- THẺ THÔNG TIN THÍ SINH -->
+            <div class="bg-slate-800/80 backdrop-blur-md rounded-3xl border border-slate-700/80 p-6 flex flex-col justify-between shadow-xl">
+                <div>
+                    <div class="w-16 h-16 rounded-2xl bg-blue-600/20 border border-blue-500/30 text-blue-400 flex items-center justify-center mx-auto mb-4 font-bold text-xl font-mono">
+                        <i data-lucide="user-check" class="w-8 h-8"></i>
+                    </div>
+                    <div class="text-center mb-6">
+                        <h2 id="student-name-display" class="text-xl font-black text-white">Thí Sinh</h2>
+                        <span id="student-class-display" class="inline-block mt-1 px-2.5 py-0.5 rounded-md text-xs font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                            Lớp 11A1
+                        </span>
+                    </div>
+
+                    <div class="space-y-3 text-xs border-t border-slate-700/60 pt-4">
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Tên đăng nhập:</span>
+                            <strong id="student-user-display" class="font-mono text-white">---</strong>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Mã Session Token:</span>
+                            <span id="student-token-display" class="font-mono text-[11px] text-blue-400 truncate max-w-[150px]">---</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Thời gian đăng nhập:</span>
+                            <span id="student-login-time" class="text-slate-300">---</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-300 flex items-start gap-2">
+                    <i data-lucide="shield" class="w-4 h-4 text-amber-400 shrink-0 mt-0.5"></i>
+                    <span>Bảo vệ Single Active Session: Hệ thống đang giám sát thiết bị này.</span>
+                </div>
+            </div>
+
+            <!-- THẺ THÔNG TIN ĐỀ THI & BẮT ĐẦU -->
+            <div class="md:col-span-2 bg-slate-800/80 backdrop-blur-md rounded-3xl border border-slate-700/80 p-6 sm:p-8 flex flex-col justify-between shadow-xl">
+                <div>
+                    <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                            Đã Sẵn Sàng Nhận Đề
+                        </span>
+                        <span class="text-xs text-slate-400 font-mono">Mã Đề: CHEM-7991-A</span>
+                    </div>
+
+                    <h2 class="text-2xl font-black text-white mb-2">Đề Kiểm Tra Định Kỳ Hóa Học THPT</h2>
+                    <p class="text-xs text-slate-400 leading-relaxed mb-6">
+                        Đề thi được biên soạn bám sát định dạng cấu trúc mới của Bộ Giáo dục và Đào tạo (Công văn 7991), áp dụng chuẩn danh pháp hóa học quốc tế IUPAC 2018 bằng tiếng Anh.
+                    </p>
+
+                    <!-- Tóm tắt cấu trúc đề thi 7991 -->
+                    <div class="grid grid-cols-3 gap-3 mb-6 text-center">
+                        <div class="p-3 rounded-2xl bg-slate-900/60 border border-slate-700/60">
+                            <span class="text-[10px] text-slate-400 uppercase font-semibold block mb-0.5">Phần I</span>
+                            <strong class="text-base text-blue-400 font-bold block">12 câu</strong>
+                            <span class="text-[10px] text-slate-500">Trắc nghiệm 4 chọn (3.0đ)</span>
+                        </div>
+                        <div class="p-3 rounded-2xl bg-slate-900/60 border border-slate-700/60">
+                            <span class="text-[10px] text-slate-400 uppercase font-semibold block mb-0.5">Phần II</span>
+                            <strong class="text-base text-amber-400 font-bold block">4 câu (16 ý)</strong>
+                            <span class="text-[10px] text-slate-500">Đúng / Sai (4.0đ)</span>
+                        </div>
+                        <div class="p-3 rounded-2xl bg-slate-900/60 border border-slate-700/60">
+                            <span class="text-[10px] text-slate-400 uppercase font-semibold block mb-0.5">Phần III</span>
+                            <strong class="text-base text-indigo-400 font-bold block">3 câu</strong>
+                            <span class="text-[10px] text-slate-500">Tự luận / Trả lời ngắn (3.0đ)</span>
+                        </div>
+                    </div>
+
+                    <!-- Quy định thi -->
+                    <div class="space-y-2 text-xs text-slate-300 mb-6 bg-slate-900/40 p-4 rounded-2xl border border-slate-700/50">
+                        <div class="font-bold text-white flex items-center gap-1.5 mb-1">
+                            <i data-lucide="alert-circle" class="w-4 h-4 text-amber-400"></i>
+                            Quy chế làm bài:
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                            <span>Thời gian làm bài: <strong>50 phút</strong> tính giờ liên tục.</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                            <span>Bắt buộc ở chế độ <strong>Toàn màn hình (Fullscreen)</strong>.</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-rose-300">
+                            <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                            <span>Hệ thống tự động <strong>khóa bài vĩnh viễn</strong> nếu chuyển tab/rời màn hình quá 3 lần.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nút Vào Làm Bài -->
+                <div>
+                    <button onclick="startExamFocusMode()" class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-extrabold text-sm sm:text-base rounded-2xl shadow-xl shadow-blue-600/30 transition flex items-center justify-center gap-2.5">
+                        <i data-lucide="play-circle" class="w-5 h-5"></i>
+                        <span>Bắt Đầu Làm Bài Thi (Focus Mode)</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="max-w-4xl w-full mx-auto text-center text-xs text-slate-500 pt-6 border-t border-slate-700/60">
+        Hệ Thống Khảo Thí & Giám Sát Trực Tuyến &bull; Bộ Giáo Dục & Đào Tạo &bull; Chuẩn IUPAC 2018
+    </footer>
+
+    <!-- MODAL CẢNH BÁO SINGLE ACTIVE SESSION BỊ GHI ĐÈ -->
+    <div id="session-alert-modal" class="fixed inset-0 bg-rose-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="max-w-md w-full bg-slate-900 border border-rose-500/50 rounded-3xl p-6 text-center shadow-2xl">
+            <div class="w-16 h-16 bg-rose-600/20 text-rose-500 border border-rose-500/40 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+                <i data-lucide="alert-octagon" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-xl font-black text-rose-500 mb-2 uppercase tracking-wide">Phiên Thi Bị Ngắt Kết Nối!</h3>
+            <p class="text-xs text-slate-300 leading-relaxed mb-6">
+                Tài khoản của bạn vừa được đăng nhập ở một <strong>trình duyệt hoặc thiết bị khác</strong>. Theo quy chế bảo mật, phiên làm việc trên thiết bị này đã bị hủy bỏ để chống gian lận thi cử.
+            </p>
+            <button onclick="logoutStudent()" class="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-lg transition">
+                Quay Lại Màn Hình Đăng Nhập
+            </button>
+        </div>
+    </div>
+
+    <!-- SCRIPT KIỂM SOÁT PHIÊN LÀM VIỆC & SUPABASE REALTIME SESSION GUARD -->
+    <script>
+        // 1. Kiểm tra session hiện tại từ LocalStorage
+        const sessionRaw = localStorage.getItem('current_student_session');
+        if (!sessionRaw) {
+            alert("Bạn chưa đăng nhập! Đang chuyển hướng về trang đăng nhập...");
+            window.location.href = 'dang-nhap-hoc-sinh.html';
+        }
+
+        const currentSession = JSON.parse(sessionRaw || '{}');
+
+        // Hiển thị thông tin thí sinh
+        document.getElementById('student-name-display').textContent = currentSession.name || 'Thí sinh';
+        document.getElementById('student-class-display').textContent = `Lớp ${currentSession.className || '11A1'}`;
+        document.getElementById('student-user-display').textContent = currentSession.username || '---';
+        document.getElementById('student-token-display').textContent = currentSession.sessionToken || '---';
+        document.getElementById('student-login-time').textContent = currentSession.loginAt ? new Date(currentSession.loginAt).toLocaleTimeString() : '---';
+
+        // 2. Kết nối Supabase Realtime nếu có
+        const supabaseUrl = localStorage.getItem('supabase_url') || '';
+        const supabaseKey = localStorage.getItem('supabase_key') || '';
+        let supabase = null;
+        if (window.supabase && supabaseUrl && !supabaseUrl.includes('mock-chem-exam')) {
+            supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+            // Lắng nghe thay đổi bản ghi học sinh trên Supabase
+            supabase
+                .channel('student_session_guard')
+                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'Students', filter: `username=eq.${currentSession.username}` }, (payload) => {
+                    const newRecord = payload.new;
+                    if (newRecord && newRecord.current_session_token && newRecord.current_session_token !== currentSession.sessionToken) {
+                        triggerSessionInvalidated();
+                    }
+                })
+                .subscribe();
+        }
+
+        // 3. Lắng nghe BroadcastChannel (Chống đăng nhập 2 tab cùng trình duyệt)
+        if (typeof BroadcastChannel !== 'undefined') {
+            const bc = new BroadcastChannel('chem_proctoring_channel');
+            bc.onmessage = (e) => {
+                const data = e.data;
+                if (data && data.type === 'STUDENT_SESSION_UPDATE' && data.username === currentSession.username) {
+                    if (data.activeSessionToken !== currentSession.sessionToken) {
+                        triggerSessionInvalidated();
+                    }
+                }
+            };
+        }
+
+        // 4. Polling kiểm tra DB LocalStorage định kỳ mỗi 2 giây
+        setInterval(() => {
+            const localStudents = JSON.parse(localStorage.getItem('supabase_students_db') || '[]');
+            const me = localStudents.find(s => s.username === currentSession.username);
+            if (me && me.current_session_token && me.current_session_token !== currentSession.sessionToken) {
+                triggerSessionInvalidated();
+            }
+        }, 2000);
+
+        function triggerSessionInvalidated() {
+            document.getElementById('session-alert-modal').classList.remove('hidden');
+        }
+
+        function logoutStudent() {
+            localStorage.removeItem('current_student_session');
+            localStorage.removeItem('student_id');
+            window.location.href = 'dang-nhap-hoc-sinh.html';
+        }
+
+        function startExamFocusMode() {
+            // Chuyển sang giao diện làm bài chính Focus Mode
+            window.location.href = 'index.html?role=student&user=' + encodeURIComponent(currentSession.username);
+        }
+
+        if (window.lucide) window.lucide.createIcons();
+    </script>
+</body>
+</html>

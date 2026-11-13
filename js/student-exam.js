@@ -40,6 +40,7 @@ class StudentExamController {
         const loginForm = document.getElementById('student-login-form');
         const pinInput = document.getElementById('exam-pin-input');
         const sbdInput = document.getElementById('student-sbd-input');
+        const passInput = document.getElementById('student-pass-input');
         const nameInput = document.getElementById('student-name-input');
         const loginError = document.getElementById('student-login-error');
 
@@ -50,12 +51,26 @@ class StudentExamController {
             });
         }
 
+        // Tự động tìm tên học sinh khi gõ SBD
+        if (sbdInput) {
+            sbdInput.addEventListener('input', (e) => {
+                const sbd = e.target.value.trim().toUpperCase();
+                const matched = INITIAL_STUDENTS_11A1.find(s => s.sbd === sbd);
+                if (matched && nameInput) {
+                    nameInput.value = matched.name;
+                    if (passInput && !passInput.value) {
+                        passInput.placeholder = `Mật khẩu riêng của ${matched.name}`;
+                    }
+                }
+            });
+        }
+
         if (loginForm) {
             loginForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const pin = pinInput.value.trim();
                 const sbd = sbdInput.value.trim().toUpperCase();
-                const name = nameInput.value.trim() || `Thí sinh ${sbd}`;
+                const password = passInput ? passInput.value.trim() : '';
 
                 if (pin !== this.metadata.pin) {
                     this.showLoginError(`Mã PIN "${pin}" không đúng! Mã đề thi yêu cầu là ${this.metadata.pin}`);
@@ -63,10 +78,24 @@ class StudentExamController {
                 }
 
                 if (!sbd) {
-                    this.showLoginError("Vui lòng nhập Số báo danh / Mã học sinh!");
+                    this.showLoginError("Vui lòng nhập Số báo danh (SBD)!");
                     return;
                 }
 
+                // Kiểm tra SBD trong danh sách lớp 11A1
+                const matchedStudent = INITIAL_STUDENTS_11A1.find(s => s.sbd === sbd);
+                if (!matchedStudent) {
+                    this.showLoginError(`Số báo danh "${sbd}" không tồn tại trong danh sách lớp 11A1!`);
+                    return;
+                }
+
+                // Kiểm tra Mật khẩu riêng của học sinh
+                if (matchedStudent.password && password !== matchedStudent.password) {
+                    this.showLoginError(`Mật khẩu không chính xác cho SBD ${sbd} (${matchedStudent.name})! Vui lòng kiểm tra lại mật khẩu riêng của bạn.`);
+                    return;
+                }
+
+                const name = matchedStudent.name;
                 this.startSession(sbd, name, pin);
             });
         }

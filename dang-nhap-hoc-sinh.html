@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Nhập Thí Sinh - Thi Hóa Học</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS Client v2 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 text-slate-100 min-h-screen flex items-center justify-center p-4">
+
+    <!-- FORM ĐĂNG NHẬP TỐI GIẢN Ở GIỮA MÀN HÌNH -->
+    <div class="max-w-md w-full bg-white text-slate-900 rounded-3xl shadow-2xl p-8 border border-slate-100">
+        
+        <!-- Header tối giản -->
+        <div class="text-center mb-6">
+            <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-inner">
+                <i data-lucide="flask-conical" class="w-8 h-8"></i>
+            </div>
+            <h1 class="text-2xl font-black tracking-tight text-slate-900">Đăng Nhập Thi Trực Tuyến</h1>
+            <p class="text-xs text-slate-500 mt-1">Cổng thi môn Hóa học - Công văn 7991</p>
+        </div>
+
+        <!-- Thông báo lỗi / trạng thái -->
+        <div id="login-alert" class="hidden mb-4 p-3 rounded-xl text-xs font-semibold"></div>
+
+        <!-- Form chỉ gồm Username & Password - Không có Đăng ký -->
+        <form id="student-login-form" class="space-y-4">
+            <div>
+                <label for="username" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Tên đăng nhập (Username)
+                </label>
+                <div class="relative">
+                    <i data-lucide="user" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
+                    <input type="text" id="username" name="username" placeholder="Ví dụ: 11A1_01 hoặc 10A3_05" required autofocus
+                        class="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-sm font-mono font-semibold transition outline-none">
+                </div>
+            </div>
+
+            <div>
+                <label for="password" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Mật khẩu (Password)
+                </label>
+                <div class="relative">
+                    <i data-lucide="key-round" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
+                    <input type="password" id="password" name="password" placeholder="Mật khẩu mặc định: HoaHoc2026" required
+                        class="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-sm font-mono font-semibold transition outline-none">
+                    <button type="button" id="toggle-pwd-btn" class="absolute right-3 top-3 text-slate-400 hover:text-slate-600">
+                        <i data-lucide="eye" class="w-4 h-4" id="eye-icon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-[11px] text-slate-500 flex items-start gap-2">
+                <i data-lucide="shield-alert" class="w-4 h-4 text-blue-600 shrink-0 mt-0.5"></i>
+                <span>Cơ chế bảo mật <strong>Single-session</strong>: Tài khoản chỉ hoạt động trên 1 thiết bị duy nhất. Đăng nhập ở thiết bị thứ hai sẽ ngắt kết nối thiết bị trước.</span>
+            </div>
+
+            <button type="submit" id="btn-submit" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-blue-500/25 transition flex items-center justify-center gap-2">
+                <span>Vào Phòng Thi</span>
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+        </form>
+
+        <div class="mt-6 pt-4 border-t border-slate-100 text-center">
+            <span class="text-[11px] text-slate-400">Nếu chưa có tài khoản, vui lòng liên hệ Giáo viên coi thi để được cấp mã.</span>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT XÁC THỰC & SINGLE ACTIVE SESSION TOKEN -->
+    <script>
+        // Cấu hình Supabase (Tự động đọc cấu hình đã lưu hoặc Mock DB)
+        const supabaseUrl = localStorage.getItem('supabase_url') || '';
+        const supabaseKey = localStorage.getItem('supabase_key') || '';
+        let supabase = null;
+        if (window.supabase && supabaseUrl && !supabaseUrl.includes('mock-chem-exam')) {
+            supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        }
+
+        // Toggle hiển thị mật khẩu
+        const toggleBtn = document.getElementById('toggle-pwd-btn');
+        const pwdInput = document.getElementById('password');
+        toggleBtn.addEventListener('click', () => {
+            const isText = pwdInput.type === 'text';
+            pwdInput.type = isText ? 'password' : 'text';
+            const icon = document.getElementById('eye-icon');
+            if (icon) {
+                icon.setAttribute('data-lucide', isText ? 'eye' : 'eye-off');
+                if (window.lucide) window.lucide.createIcons();
+            }
+        });
+
+        // Xử lý Submit Form
+        const loginForm = document.getElementById('student-login-form');
+        const loginAlert = document.getElementById('login-alert');
+        const submitBtn = document.getElementById('btn-submit');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+
+            if (!username || !password) {
+                showAlert('Vui lòng nhập đầy đủ Username và Password!', 'error');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin mr-1"></i> Đang xác thực...`;
+            if (window.lucide) window.lucide.createIcons();
+
+            try {
+                let studentData = null;
+
+                // 1. Query Supabase Cloud nếu có cấu hình
+                if (supabase) {
+                    const { data, error } = await supabase
+                        .from('Students')
+                        .select('*')
+                        .eq('username', username)
+                        .eq('password', password)
+                        .single();
+
+                    if (!error && data) {
+                        studentData = data;
+                    }
+                }
+
+                // 2. Fallback sang LocalStore DB
+                if (!studentData) {
+                    const localStudents = JSON.parse(localStorage.getItem('supabase_students_db') || '[]');
+                    const found = localStudents.find(s => s.username.toLowerCase() === username.toLowerCase() && s.password === password);
+                    if (found) {
+                        studentData = found;
+                    }
+                }
+
+                // 3. Xử lý kết quả xác thực
+                if (!studentData) {
+                    showAlert('Tên đăng nhập hoặc Mật khẩu không chính xác!', 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = `<span>Vào Phòng Thi</span> <i data-lucide="arrow-right" class="w-4 h-4"></i>`;
+                    if (window.lucide) window.lucide.createIcons();
+                    return;
+                }
+
+                // 4. Sinh ra session_token duy nhất để chặn đăng nhập 2 thiết bị
+                const sessionToken = 'tok_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
+                const studentId = studentData.id || studentData.username;
+
+                // Lưu student_id và session_token vào LocalStorage
+                localStorage.setItem('student_id', studentId);
+                localStorage.setItem('current_student_session', JSON.stringify({
+                    studentId: studentId,
+                    username: studentData.username,
+                    name: studentData.ho_ten,
+                    className: studentData.ten_lop,
+                    sessionToken: sessionToken,
+                    loginAt: new Date().toISOString()
+                }));
+
+                // 5. Cập nhật current_session_token lên Database
+                if (supabase && studentData.id) {
+                    await supabase
+                        .from('Students')
+                        .update({ 
+                            current_session_token: sessionToken,
+                            last_login_at: new Date().toISOString()
+                        })
+                        .eq('id', studentData.id);
+                }
+
+                // Luôn cập nhật vào LocalStore DB
+                const localStudents = JSON.parse(localStorage.getItem('supabase_students_db') || '[]');
+                const idx = localStudents.findIndex(s => s.username === studentData.username);
+                if (idx !== -1) {
+                    localStudents[idx].current_session_token = sessionToken;
+                    localStudents[idx].last_login_at = new Date().toISOString();
+                    localStorage.setItem('supabase_students_db', JSON.stringify(localStudents));
+                }
+
+                // Bắn tín hiệu qua BroadcastChannel để ngắt kết nối session cũ ở tab khác nếu có
+                if (typeof BroadcastChannel !== 'undefined') {
+                    const bc = new BroadcastChannel('chem_proctoring_channel');
+                    bc.postMessage({
+                        type: 'STUDENT_SESSION_UPDATE',
+                        username: studentData.username,
+                        activeSessionToken: sessionToken
+                    });
+                }
+
+                showAlert(`Đăng nhập thành công! Đang chuyển hướng vào phòng chờ thi...`, 'success');
+
+                // Chuyển hướng sang trang phòng chờ lấy đề thi
+                setTimeout(() => {
+                    window.location.href = 'phong-cho.html';
+                }, 800);
+
+            } catch (err) {
+                console.error(err);
+                showAlert('Đã xảy ra lỗi trong quá trình kết nối. Vui lòng thử lại!', 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<span>Vào Phòng Thi</span> <i data-lucide="arrow-right" class="w-4 h-4"></i>`;
+                if (window.lucide) window.lucide.createIcons();
+            }
+        });
+
+        function showAlert(msg, type) {
+            loginAlert.classList.remove('hidden');
+            if (type === 'error') {
+                loginAlert.className = 'mb-4 p-3 rounded-xl text-xs font-semibold bg-rose-50 border border-rose-200 text-rose-700 flex items-center gap-1.5';
+                loginAlert.innerHTML = `<i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i> <span>${msg}</span>`;
+            } else {
+                loginAlert.className = 'mb-4 p-3 rounded-xl text-xs font-semibold bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center gap-1.5';
+                loginAlert.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 shrink-0"></i> <span>${msg}</span>`;
+            }
+            if (window.lucide) window.lucide.createIcons();
+        }
+
+        if (window.lucide) window.lucide.createIcons();
+    </script>
+</body>
+</html>
