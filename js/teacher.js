@@ -244,8 +244,28 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("modalStudentClass").textContent = student.class;
         document.getElementById("modalExamName").textContent = `🧪 ${student.assignment}`;
 
-        // Live text
-        document.getElementById("modalLiveCodeContent").textContent = student.liveCode || "(Học sinh chưa nhập câu trả lời...)";
+        // Live text và phiếu trả lời trắc nghiệm 20 câu
+        const letters = ["A", "B", "C", "D"];
+        let ansCards = "";
+        for (let i = 1; i <= 20; i++) {
+            const ans = student.answers ? student.answers[i] : undefined;
+            if (ans !== undefined) {
+                ansCards += `<span style="background: #0284c7; color: #ffffff; padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 11px; text-align: center;">C${i}: ${letters[ans]}</span>`;
+            } else {
+                ansCards += `<span style="background: #1e293b; color: #64748b; padding: 4px 8px; border-radius: 6px; font-size: 11px; text-align: center; border: 1px dashed #334155;">C${i}: --</span>`;
+            }
+        }
+
+        const liveHtml = `
+            <div style="margin-bottom: 12px; color: #38bdf8; font-weight: 600;">
+                <i class="fa-solid fa-clock-rotate-left"></i> ${student.liveCode || "Học sinh đang theo dõi đề thi..."}
+            </div>
+            <div style="font-size: 12px; font-weight: 700; color: #94a3b8; margin-bottom: 6px;">Phiếu trả lời trắc nghiệm (20 Câu):</div>
+            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px;">
+                ${ansCards}
+            </div>
+        `;
+        document.getElementById("modalLiveCodeContent").innerHTML = liveHtml;
         document.getElementById("modalLastKeyTime").textContent = `Cập nhật: ${student.lastActive}`;
 
         // Cảnh báo rời tab
@@ -416,23 +436,28 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // 10. Chấm Tự Động (Auto-grade)
+    // 10. Chấm Tự Động (Auto-grade) theo đáp án Mã đề 1101
     document.getElementById("btnAutoGrade").addEventListener("click", () => {
         const students = getStudents();
+        const questions = (CHEM_DATA.assignments[0] && CHEM_DATA.assignments[0].questions) || [];
         let gradedCount = 0;
 
         students.forEach(s => {
-            if (s.submitted && !s.graded) {
-                // Tự động tính điểm
+            if (s.submitted) {
+                let correctCount = 0;
+                questions.forEach(q => {
+                    if (s.answers && s.answers[q.id] === q.correct) correctCount++;
+                });
+                const calculatedScore = Math.round(correctCount * 0.5 * 10) / 10;
                 s.graded = true;
-                s.score = s.score || 7.5;
-                s.feedback = "Chấm tự động: Hoàn thành tốt các câu trắc nghiệm thí nghiệm este.";
+                s.score = calculatedScore;
+                s.feedback = `Chấm tự động: Đúng ${correctCount}/${questions.length} câu.`;
                 gradedCount++;
             }
         });
 
         bus.saveStudents(students);
-        alert(`Hệ thống đã tự động chấm điểm cho toàn bộ học sinh đã nộp bài!`);
+        alert(`Hệ thống đã tự động chấm điểm cho ${gradedCount} học sinh theo đáp án chính thức Mã đề 1101!`);
         refreshAllViews();
     });
 

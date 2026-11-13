@@ -1,25 +1,26 @@
 /**
- * LOGIC GIAO DIỆN HỌC SINH - LÀM BÀI HÓA HỌC 12 KNTT
- * Hệ thống chống gian lận & giám sát thời gian thực kết nối với Thầy Nguyễn Vỹ
+ * LOGIC GIAO DIỆN HỌC SINH - BÀI KIỂM TRA THƯỜNG XUYÊN HÓA 11 (MÃ ĐỀ 1101)
+ * Hệ thống giám sát trực tiếp & tự động chấm điểm kết nối Thầy Nguyễn Vỹ
  */
 
 document.addEventListener("DOMContentLoaded", () => {
     const bus = new ChemSyncChannel("student");
     const students = bus.getStudents();
+    const assignment = CHEM_DATA.assignments[0];
+    const questions = assignment.questions || [];
 
-    // 1. Xác định học sinh hiện tại từ URL query hoặc mặc định là Nguyễn Minh An (1101)
+    // 1. Xác định học sinh từ URL query (?id=1101) hoặc mặc định học sinh đầu tiên
     const urlParams = new URLSearchParams(window.location.search);
     let currentStudentId = urlParams.get("id") || "1101";
-
     let currentStudent = bus.getStudentById(currentStudentId) || students[0];
 
-    // Khởi tạo trạng thái câu trả lời
+    // Khởi tạo trạng thái
     let studentAnswers = currentStudent.answers || {};
     let leaveCount = currentStudent.leaveCount || 0;
     let integrity = currentStudent.integrity || 100;
     let isExamSubmitted = currentStudent.submitted || false;
 
-    // 2. Điền danh sách chọn học sinh để test mô phỏng
+    // 2. Điền danh sách học sinh vào dropdown
     const selectStudentUser = document.getElementById("selectStudentUser");
     if (selectStudentUser) {
         selectStudentUser.innerHTML = students.map(s => `
@@ -31,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 3. Cập nhật thông tin học sinh lên giao diện
+    // 3. Cập nhật header học sinh
     function updateStudentHeader() {
         document.getElementById("studentDisplayName").textContent = currentStudent.name;
         document.getElementById("studentDisplayId").textContent = currentStudent.id;
@@ -45,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const sidebarCount = document.getElementById("sidebarLeaveCount");
 
         text.textContent = `Tập trung: ${integrity}%`;
-        sidebarCount.textContent = `${leaveCount} lần`;
+        if (sidebarCount) sidebarCount.textContent = `${leaveCount} lần`;
 
         if (integrity < 80) {
             pill.className = "integrity-pill warning";
@@ -54,7 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // 4. Phát thông báo học sinh đăng nhập vào phòng thi
+    // 4. Phát tín hiệu đăng nhập vào phòng thi
     bus.updateStudent(currentStudent.id, {
         online: true,
         status: isExamSubmitted ? "Đã nộp bài" : "Đang làm bài...",
@@ -67,60 +68,120 @@ document.addEventListener("DOMContentLoaded", () => {
         class: currentStudent.class
     });
 
-    // 5. Khôi phục bài làm nếu đã có dữ liệu trước đó
-    const essayTextarea = document.getElementById("essayInput");
-    if (currentStudent.liveCode) {
-        essayTextarea.value = currentStudent.liveCode;
-        updateCharCounter();
+    // 5. Render toàn bộ 20 câu hỏi trắc nghiệm
+    const questionsContainer = document.getElementById("questionsListContainer");
+    const paletteGrid = document.getElementById("questionPaletteGrid");
+
+    if (questionsContainer) {
+        questionsContainer.innerHTML = questions.map((q, idx) => {
+            const savedAns = studentAnswers[q.id];
+            return `
+                <div class="question-card" id="q-card-${q.id}">
+                    <div class="question-title">${q.title} (${q.points} điểm)</div>
+                    <div class="question-text">${q.text}</div>
+                    <div class="mcq-options-list">
+                        ${q.options.map((opt, optIdx) => `
+                            <label class="mcq-option-item ${savedAns === optIdx ? 'selected' : ''}" onclick="selectMcqOption(${q.id}, ${optIdx})">
+                                <input type="radio" name="question_${q.id}" value="${optIdx}" ${savedAns === optIdx ? 'checked' : ''}>
+                                ${opt}
+                            </label>
+                        `).join("")}
+                    </div>
+                </div>
+            `;
+        }).join("");
     }
 
-    // Khôi phục đáp án trắc nghiệm nếu đã chọn
-    if (studentAnswers[1] !== undefined) {
-        const radio = document.querySelector(`input[name="question_1"][value="${studentAnswers[1]}"]`);
-        if (radio) { radio.checked = true; radio.closest('.mcq-option-item').classList.add('selected'); }
+    // Render palette 20 câu hỏi bên cột phải
+    if (paletteGrid) {
+        paletteGrid.innerHTML = questions.map(q => `
+            <button type="button" class="palette-btn ${studentAnswers[q.id] !== undefined ? 'answered' : ''}" 
+                id="pal-btn-${q.id}" onclick="scrollToQuestion(${q.id})">
+                Câu ${q.id}
+            </button>
+        `).join("");
     }
-    if (studentAnswers[2] !== undefined) {
-        const radio = document.querySelector(`input[name="question_2"][value="${studentAnswers[2]}"]`);
-        if (radio) { radio.checked = true; radio.closest('.mcq-option-item').classList.add('selected'); }
-    }
-    if (studentAnswers[3] !== undefined) {
-        const radio = document.querySelector(`input[name="question_3"][value="${studentAnswers[3]}"]`);
-        if (radio) { radio.checked = true; radio.closest('.mcq-option-item').classList.add('selected'); }
-    }
-    if (studentAnswers[4] !== undefined) {
-        const radio = document.querySelector(`input[name="question_4"][value="${studentAnswers[4]}"]`);
-        if (radio) { radio.checked = true; radio.closest('.mcq-option-item').classList.add('selected'); }
-    }
-    updatePaletteStatus();
 
-    // 6. Âm thanh cảnh báo (Web Audio API Synthesizer)
+    // 6. Xử lý khi học sinh chọn đáp án
+    window.selectMcqOption = function(qId, optionIndex) {
+        if (isExamSubmitted) return;
+
+        studentAnswers[qId] = optionIndex;
+
+        // Cập nhật giao diện câu hỏi
+        const card = document.getElementById(`q-card-${qId}`);
+        if (card) {
+            card.querySelectorAll(".mcq-option-item").forEach(item => item.classList.remove("selected"));
+            const targetRadio = card.querySelector(`input[value="${optionIndex}"]`);
+            if (targetRadio) {
+                targetRadio.checked = true;
+                targetRadio.closest(".mcq-option-item").classList.add("selected");
+            }
+        }
+
+        // Cập nhật palette
+        const palBtn = document.getElementById(`pal-btn-${qId}`);
+        if (palBtn) palBtn.classList.add("answered");
+
+        updateProgressUI();
+
+        // Đồng bộ thời gian thực sang Thầy Vỹ
+        const answeredCount = Object.keys(studentAnswers).length;
+        const progressStr = `${answeredCount}/${questions.length} câu • ${Math.round(answeredCount / questions.length * 100)}%`;
+        const optionLetters = ["A", "B", "C", "D"];
+
+        bus.send("STUDENT_TYPING", {
+            id: currentStudent.id,
+            name: currentStudent.name,
+            answeredCount: answeredCount,
+            progress: progressStr,
+            text: `Vừa chọn đáp án ${optionLetters[optionIndex]} cho Câu ${qId} (Đã làm: ${progressStr})`
+        });
+    };
+
+    function updateProgressUI() {
+        const answeredCount = Object.keys(studentAnswers).length;
+        const total = questions.length;
+        const percent = Math.round((answeredCount / total) * 100);
+
+        const answeredCountEl = document.getElementById("answeredCount");
+        const progressPercentEl = document.getElementById("progressPercent");
+
+        if (answeredCountEl) answeredCountEl.textContent = `${answeredCount} / ${total} câu`;
+        if (progressPercentEl) progressPercentEl.textContent = `${percent}%`;
+    }
+
+    window.scrollToQuestion = function(qId) {
+        const el = document.getElementById(`q-card-${qId}`);
+        if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+    };
+
+    // 7. Âm thanh cảnh báo (Web Audio API)
     function playBeepAlarm() {
         try {
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.type = "sine";
-            osc.frequency.setValueAtTime(800, ctx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.3);
+            osc.frequency.setValueAtTime(850, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(450, ctx.currentTime + 0.3);
             gain.gain.setValueAtTime(0.3, ctx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
             osc.connect(gain);
             gain.connect(ctx.destination);
             osc.start();
             osc.stop(ctx.currentTime + 0.35);
-        } catch (e) {
-            console.warn("Audio Context not supported");
-        }
+        } catch (e) {}
     }
 
-    // =========================================================================
-    // HỆ THỐNG PHÁT HIỆN RỜI TAB & GIAN LẬN THỜI GIAN THỰC (ANTI-CHEAT DETECTOR)
-    // =========================================================================
+    // 8. Hệ thống chống gian lận - Phát hiện rời tab
     let isTabCurrentlyHidden = false;
 
     function handleStudentLeave() {
         if (isExamSubmitted) return;
-        if (isTabCurrentlyHidden) return; // tránh trùng lặp giữa blur và visibilitychange
+        if (isTabCurrentlyHidden) return;
 
         isTabCurrentlyHidden = true;
         leaveCount++;
@@ -128,7 +189,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         playBeepAlarm();
 
-        // Gửi ngay lập tức sang máy Thầy Nguyễn Vỹ
         bus.send("STUDENT_LEAVE_TAB", {
             id: currentStudent.id,
             name: currentStudent.name,
@@ -146,233 +206,111 @@ document.addEventListener("DOMContentLoaded", () => {
 
         isTabCurrentlyHidden = false;
 
-        // Hiển thị modal cảnh báo trên màn hình học sinh
         const cheatModal = document.getElementById("studentCheatModal");
         const violationBox = document.getElementById("cheatViolationBox");
-        violationBox.textContent = `Số lần vi phạm: ${leaveCount} lần • Chỉ số liêm chính giảm còn ${integrity}%`;
-        cheatModal.classList.add("active");
+        if (violationBox) {
+            violationBox.textContent = `Số lần vi phạm: ${leaveCount} lần • Chỉ số liêm chính giảm còn ${integrity}%`;
+        }
+        if (cheatModal) cheatModal.classList.add("active");
 
         playBeepAlarm();
     }
 
-    // Lắng nghe sự kiện rời tab (Visibility API)
     document.addEventListener("visibilitychange", () => {
-        if (document.hidden) {
-            handleStudentLeave();
-        } else {
-            handleStudentReturn();
-        }
+        if (document.hidden) handleStudentLeave();
+        else handleStudentReturn();
     });
 
-    // Lắng nghe mất tiêu điểm cửa sổ
-    window.addEventListener("blur", () => {
-        handleStudentLeave();
-    });
+    window.addEventListener("blur", () => handleStudentLeave());
+    window.addEventListener("focus", () => handleStudentReturn());
 
-    window.addEventListener("focus", () => {
-        handleStudentReturn();
-    });
-
-    // Nút xác nhận đã hiểu khi bị cảnh báo
-    document.getElementById("btnAcknowledgeCheat").addEventListener("click", () => {
-        document.getElementById("studentCheatModal").classList.remove("active");
-        bus.send("STUDENT_RETURN_TAB", {
-            id: currentStudent.id,
-            name: currentStudent.name
-        });
-    });
-
-    // =========================================================================
-    // THEO DÕI GÕ BÀI VÀ THAO TÁC TRẮC NGHIỆM THỜI GIAN THỰC (REALTIME STREAM)
-    // =========================================================================
-    function updateCharCounter() {
-        const text = essayTextarea.value;
-        const charCount = text.length;
-        const lineCount = text ? text.split("\n").length : 0;
-        document.getElementById("charCountDisplay").textContent = `Đã nhập: ${charCount} ký tự • ${lineCount} dòng`;
-    }
-
-    let typingTimer = null;
-    essayTextarea.addEventListener("input", () => {
-        updateCharCounter();
-        studentAnswers[6] = essayTextarea.value;
-        updatePaletteStatus();
-
-        // Gửi stream trực tiếp sang Thầy Vỹ với debounce nhẹ
-        clearTimeout(typingTimer);
-        typingTimer = setTimeout(() => {
-            const text = essayTextarea.value;
-            const lineCount = text ? text.split("\n").length : 0;
-
-            bus.send("STUDENT_TYPING", {
+    const btnAcknowledgeCheat = document.getElementById("btnAcknowledgeCheat");
+    if (btnAcknowledgeCheat) {
+        btnAcknowledgeCheat.addEventListener("click", () => {
+            document.getElementById("studentCheatModal").classList.remove("active");
+            bus.send("STUDENT_RETURN_TAB", {
                 id: currentStudent.id,
-                name: currentStudent.name,
-                text: text,
-                charCount: text.length,
-                lineCount: lineCount
+                name: currentStudent.name
             });
-        }, 150);
-    });
-
-    // Bàn phím ký hiệu hóa học ảo
-    window.insertSymbol = function(symbol) {
-        const start = essayTextarea.selectionStart;
-        const end = essayTextarea.selectionEnd;
-        const text = essayTextarea.value;
-        essayTextarea.value = text.substring(0, start) + symbol + text.substring(end);
-        essayTextarea.selectionStart = essayTextarea.selectionEnd = start + symbol.length;
-        essayTextarea.focus();
-        essayTextarea.dispatchEvent(new Event("input"));
-    };
-
-    // Chọn trắc nghiệm 4 lựa chọn (MCQ)
-    window.selectMcqOption = function(qId, optionIndex) {
-        studentAnswers[qId] = optionIndex;
-        const card = document.getElementById(`q-card-${qId}`);
-        if (card) {
-            card.querySelectorAll(".mcq-option-item").forEach(item => item.classList.remove("selected"));
-            const targetRadio = card.querySelector(`input[value="${optionIndex}"]`);
-            if (targetRadio) {
-                targetRadio.checked = true;
-                targetRadio.closest(".mcq-option-item").classList.add("selected");
-            }
-        }
-        updatePaletteStatus();
-
-        bus.send("STUDENT_TYPING", {
-            id: currentStudent.id,
-            name: currentStudent.name,
-            text: essayTextarea.value || `Đã chọn đáp án Câu ${qId}`,
-            charCount: essayTextarea.value.length,
-            lineCount: 1
         });
-    };
-
-    // Chọn Đúng/Sai cho câu 5
-    window.selectTFOption = function(subId, isTrue) {
-        studentAnswers[subId] = isTrue;
-        updatePaletteStatus();
-    };
-
-    // Cập nhật bảng palette câu hỏi bên phải
-    function updatePaletteStatus() {
-        let count = 0;
-        for (let i = 1; i <= 4; i++) {
-            const btn = document.getElementById(`pal-btn-${i}`);
-            if (studentAnswers[i] !== undefined) {
-                btn.classList.add("answered");
-                count++;
-            } else {
-                btn.classList.remove("answered");
-            }
-        }
-
-        // Câu 5
-        const q5Done = ['5a', '5b', '5c', '5d'].some(k => studentAnswers[k] !== undefined);
-        const btn5 = document.getElementById("pal-btn-5");
-        if (q5Done) { btn5.classList.add("answered"); count++; }
-        else { btn5.classList.remove("answered"); }
-
-        // Câu 6
-        const btn6 = document.getElementById("pal-btn-6");
-        if (essayTextarea.value.trim().length > 0) {
-            btn6.classList.add("answered");
-            count++;
-        } else {
-            btn6.classList.remove("answered");
-        }
-
-        document.getElementById("answeredCount").textContent = `${count} / 6`;
     }
 
-    // Cuộn mượt đến câu hỏi
-    window.scrollToQuestion = function(num) {
-        const el = document.getElementById(`q-card-${num}`);
-        if (el) {
-            el.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-    };
-
-    // 7. Đồng hồ đếm ngược bài thi
-    let remainingSeconds = 42 * 60 + 15;
+    // 9. Đồng hồ đếm ngược 20 phút (1200 giây)
+    let remainingSeconds = 20 * 60;
     const timerText = document.getElementById("timerText");
+
     const timerInterval = setInterval(() => {
         if (remainingSeconds <= 0 || isExamSubmitted) {
             clearInterval(timerInterval);
+            if (remainingSeconds <= 0 && !isExamSubmitted) {
+                alert("Hết giờ làm bài! Hệ thống tự động thu bài của em.");
+                submitStudentExam();
+            }
             return;
         }
         remainingSeconds--;
         const mins = Math.floor(remainingSeconds / 60);
         const secs = remainingSeconds % 60;
-        timerText.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        if (timerText) {
+            timerText.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
     }, 1000);
 
-    // =========================================================================
-    // NỘP BÀI KIỂM TRA
-    // =========================================================================
-    document.getElementById("btnSubmitExam").addEventListener("click", () => {
-        if (isExamSubmitted) {
-            alert("Em đã nộp bài thi rồi!");
-            return;
+    // 10. Xử lý nộp bài thi
+    function submitStudentExam() {
+        isExamSubmitted = true;
+
+        // Tính điểm tự động: 0.5 điểm mỗi câu đúng
+        let correctCount = 0;
+        questions.forEach(q => {
+            if (studentAnswers[q.id] === q.correct) {
+                correctCount++;
+            }
+        });
+
+        let finalScore = Math.round(correctCount * 0.5 * 10) / 10;
+        const answeredCount = Object.keys(studentAnswers).length;
+
+        // Gửi kết quả về máy Thầy Nguyễn Vỹ
+        bus.send("STUDENT_SUBMIT", {
+            id: currentStudent.id,
+            name: currentStudent.name,
+            class: currentStudent.class,
+            score: finalScore,
+            correctCount: correctCount,
+            totalQuestions: questions.length,
+            feedback: `Đúng ${correctCount}/${questions.length} câu (${finalScore} điểm). Vi phạm rời tab: ${leaveCount} lần.`,
+            answers: studentAnswers
+        });
+
+        alert(`🎉 Chúc mừng ${currentStudent.name}!\n\nEm đã hoàn thành bài kiểm tra Hóa 11 - Mã đề 1101!\n- Số câu đúng: ${correctCount} / ${questions.length} câu\n- Điểm số: ${finalScore} / 10.0 điểm\n- Kết quả đã được chuyển ngay đến Thầy Nguyễn Vỹ.`);
+
+        const submitBtn = document.getElementById("btnSubmitExam");
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = `✅ ĐÃ NỘP BÀI: ${finalScore} ĐIỂM`;
+            submitBtn.style.background = "#16a34a";
         }
+    }
 
-        if (confirm("Em có chắc chắn muốn nộp bài kiểm tra Hóa học 12 này cho Thầy Nguyễn Vỹ không?")) {
-            isExamSubmitted = true;
+    const btnSubmitExam = document.getElementById("btnSubmitExam");
+    if (btnSubmitExam) {
+        btnSubmitExam.addEventListener("click", () => {
+            const answeredCount = Object.keys(studentAnswers).length;
+            const unanswered = questions.length - answeredCount;
 
-            // Tính điểm tự động sơ bộ
-            let score = 0;
-            // Q1: B (1) -> 1đ
-            if (studentAnswers[1] === 1) score += 1.0;
-            // Q2: C (2) -> 1đ
-            if (studentAnswers[2] === 2) score += 1.0;
-            // Q3: A (0) -> 1đ
-            if (studentAnswers[3] === 0) score += 1.0;
-            // Q4: C (2) -> 1đ
-            if (studentAnswers[4] === 2) score += 1.0;
-
-            // Q5: 5a false, 5b true, 5c true, 5d true
-            let q5Score = 0;
-            if (studentAnswers['5a'] === false) q5Score += 0.5;
-            if (studentAnswers['5b'] === true) q5Score += 0.5;
-            if (studentAnswers['5c'] === true) q5Score += 0.5;
-            if (studentAnswers['5d'] === true) q5Score += 0.5;
-            score += q5Score;
-
-            // Tự luận Q6 (tối đa 4đ)
-            const essayVal = essayTextarea.value.toLowerCase();
-            let essayScore = 1.0;
-            if (essayVal.includes("ch3cooc2h5") || essayVal.includes("este")) essayScore += 1.5;
-            if (essayVal.includes("thuan nghich") || essayVal.includes("cân bằng") || essayVal.includes("<=>")) essayScore += 1.5;
-            score += essayScore;
-
-            // Trừ điểm liêm chính nếu rời tab nhiều
-            if (leaveCount >= 3) {
-                score = Math.max(1.0, score - 1.0);
+            let confirmMsg = `Em có chắc chắn muốn nộp bài kiểm tra Hóa học 11 này không?`;
+            if (unanswered > 0) {
+                confirmMsg = `Em còn ${unanswered} câu chưa trả lời. Em có chắc chắn muốn nộp bài ngay không?`;
             }
 
-            score = Math.round(score * 10) / 10;
+            if (confirm(confirmMsg)) {
+                submitStudentExam();
+            }
+        });
+    }
 
-            // Gửi dữ liệu nộp bài
-            bus.send("STUDENT_SUBMIT", {
-                id: currentStudent.id,
-                name: currentStudent.name,
-                class: currentStudent.class,
-                score: score,
-                feedback: `Hoàn thành bài thi (Vi phạm rời tab: ${leaveCount} lần).`,
-                answers: studentAnswers,
-                essayText: essayTextarea.value
-            });
-
-            alert(`Chúc mừng ${currentStudent.name}! Em đã nộp bài thi thành công!\nĐiểm số dự kiến: ${score}/10đ\nBài làm và nhật ký phòng thi đã được chuyển đến Thầy Nguyễn Vỹ.`);
-            document.getElementById("btnSubmitExam").disabled = true;
-            document.getElementById("btnSubmitExam").textContent = "✅ ĐÃ NỘP BÀI THÀNH CÔNG";
-            document.getElementById("btnSubmitExam").style.background = "#16a34a";
-        }
-    });
-
-    // =========================================================================
-    // NHẬN CẢNH BÁO TRỰC TIẾP TỪ THẦY NGUYỄN VỸ
-    // =========================================================================
+    // Nhận cảnh báo từ giáo viên
     bus.on("TEACHER_ALERT", (payload) => {
         if (payload.studentId === String(currentStudent.id)) {
             playBeepAlarm();
@@ -382,21 +320,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     bus.on("TEACHER_REOPEN", () => {
         isExamSubmitted = false;
-        document.getElementById("btnSubmitExam").disabled = false;
-        document.getElementById("btnSubmitExam").textContent = "Nộp Bài Kiểm Tra";
-        document.getElementById("btnSubmitExam").style.background = "linear-gradient(135deg, #0284c7 0%, #0369a1 100%)";
-        alert("Thầy Nguyễn Vỹ đã mở lại quyền làm bài cho cả lớp!");
-    });
-
-    bus.on("STUDENT_ROSTER_UPDATED", () => {
-        const updatedList = bus.getStudents();
-        if (selectStudentUser) {
-            selectStudentUser.innerHTML = updatedList.map(s => `
-                <option value="${s.id}" ${s.id === currentStudentId ? 'selected' : ''}>${s.id} - ${s.name} (${s.class})</option>
-            `).join("");
+        const submitBtn = document.getElementById("btnSubmitExam");
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Nộp Bài Kiểm Tra";
+            submitBtn.style.background = "linear-gradient(135deg, #0284c7 0%, #0369a1 100%)";
         }
+        alert("Thầy Nguyễn Vỹ đã mở lại quyền làm bài cho cả lớp!");
     });
 
     // Khởi tạo
     updateStudentHeader();
+    updateProgressUI();
 });
