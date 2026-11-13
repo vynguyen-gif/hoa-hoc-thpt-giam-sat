@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "name": "chem-exam-cv7991",
+  "cleanUrls": true,
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ]
+}
