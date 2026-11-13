@@ -201,7 +201,7 @@ const EXAM_QUESTIONS = {
         }
     ],
 
-    // PHẦN II: TRẮC NGHIỆM ĐÚNG/SAI (4 CÂU, MỖI CÂU 4 LỆNH HỎI a, b, c, d)
+    // PHẦN II: TRẮC NGHIỆM ĐÚNG/SAI (4 CÂU)
     part2: [
         {
             id: "p2_q1",
@@ -253,7 +253,7 @@ const EXAM_QUESTIONS = {
         }
     ],
 
-    // PHẦN III: TỰ LUẬN / BÀI TẬP VẬN DỤNG CAO (3 CÂU)
+    // PHẦN III: TỰ LUẬN (3 CÂU)
     part3: [
         {
             id: "p3_q1",
@@ -302,54 +302,56 @@ const EXAM_QUESTIONS = {
     ]
 };
 
-// DANH SÁCH 41 HỌC SINH LỚP 11A1 - MỖI HỌC SINH CÓ SBD & PASS RIÊNG BIỆT
+// DANH SÁCH 41 HỌC SINH LỚP 11A1 - CỐ ĐỊNH CHUẨN MẬT KHẨU KHÔNG THAY ĐỔI THEO THỜI GIAN
+// Đồng bộ 100% giữa Giao diện Giáo viên và Giao diện Học sinh
 const INITIAL_STUDENTS_11A1 = [
-    { stt: 1, sbd: "11A101", name: "Nguyễn Minh An", dob: "09/08/2010", password: "An908", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "NA" },
-    { stt: 2, sbd: "11A102", name: "Trần Nữ Gia Anh", dob: "22/06/2010", password: "Anh622", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TA" },
-    { stt: 3, sbd: "11A103", name: "Trần Lâm Hoài Ân", dob: "22/06/2010", password: "An622", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TÂ" },
-    { stt: 4, sbd: "11A104", name: "Nguyễn Công Danh", dob: "14/09/2010", password: "Danh914", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "ND" },
-    { stt: 5, sbd: "11A105", name: "Nguyễn Châu Quốc Duy", dob: "23/12/2010", password: "Duy122", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "ND" },
-    { stt: 6, sbd: "11A106", name: "Đặng Văn Đạt", dob: "29/03/2010", password: "Dat329", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "ĐĐ" },
-    { stt: 7, sbd: "11A107", name: "Trần Quốc Hào", dob: "07/01/2010", password: "Hao107", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TH" },
-    { stt: 8, sbd: "11A108", name: "Dương Gia Hân", dob: "12/10/2010", password: "Han101", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "DH" },
-    { stt: 9, sbd: "11A109", name: "Lê Gia Hùng", dob: "29/09/2010", password: "Hung929", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "LH" },
-    { stt: 10, sbd: "11A110", name: "Nguyễn Lê Quốc Hùng", dob: "01/01/2010", password: "Hung101", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "NH" },
-    { stt: 11, sbd: "11A111", name: "Trần Nguyễn Anh Khôi", dob: "02/09/2010", password: "Khoi902", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TK" },
-    { stt: 12, sbd: "11A112", name: "Trương Quỳnh Mai", dob: "03/03/2010", password: "Mai303", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TM" },
-    { stt: 13, sbd: "11A113", name: "Lê Hoàng My", dob: "03/02/2010", password: "My203", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "LM" },
-    { stt: 14, sbd: "11A114", name: "Võ Nhật Nam", dob: "20/08/2010", password: "Nam820", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "VN" },
-    { stt: 15, sbd: "11A115", name: "Trần Khánh Ngân", dob: "09/03/2010", password: "Ngan309", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TN" },
-    { stt: 16, sbd: "11A116", name: "Võ Thị Thu Ngân", dob: "07/10/2010", password: "Ngan107", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "VN" },
-    { stt: 17, sbd: "11A117", name: "Lê Yến Nhi", dob: "20/07/2010", password: "Nhi720", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "LN" },
-    { stt: 18, sbd: "11A118", name: "Phạm Ngọc Thảo Nhi", dob: "21/03/2010", password: "Nhi321", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "PN" },
-    { stt: 19, sbd: "11A119", name: "Trần Ngọc Yến Oanh", dob: "06/11/2010", password: "Oanh116", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TO" },
-    { stt: 20, sbd: "11A120", name: "Trần Ngọc Phúc", dob: "30/03/2010", password: "Phuc330", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TP" },
-    { stt: 21, sbd: "11A121", name: "Nguyễn Thị Kim Phụng", dob: "03/08/2010", password: "Phung803", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "NP" },
-    { stt: 22, sbd: "11A122", name: "Đỗ Vũ Kim Phượng", dob: "27/06/2010", password: "Phuong627", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "ĐP" },
-    { stt: 23, sbd: "11A123", name: "Nguyễn Thị Thúy Quyên", dob: "10/04/2010", password: "Quyen410", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "NQ" },
-    { stt: 24, sbd: "11A124", name: "Nguyễn Thị Như Quỳnh", dob: "10/09/2010", password: "Quynh910", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "NQ" },
-    { stt: 25, sbd: "11A125", name: "Trần Lê Bảo Quỳnh", dob: "08/02/2010", password: "Quynh208", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TQ" },
-    { stt: 26, sbd: "11A126", name: "Nguyễn Cao Sang", dob: "02/11/2010", password: "Sang112", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "NS" },
-    { stt: 27, sbd: "11A127", name: "Võ Nguyễn Minh Sơn", dob: "01/12/2010", password: "Son121", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "VS" },
-    { stt: 28, sbd: "11A128", name: "Huỳnh Đặng Thanh Thảo", dob: "31/07/2010", password: "Thao731", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "HT" },
-    { stt: 29, sbd: "11A129", name: "Huỳnh Bảo Thi", dob: "04/10/2010", password: "Thi104", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "HT" },
-    { stt: 30, sbd: "11A130", name: "Hồ Hữu Kim Thiên", dob: "14/06/2010", password: "Thien614", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "HT" },
-    { stt: 31, sbd: "11A131", name: "Cao Tấn Thịnh", dob: "20/05/2010", password: "Thinh520", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "CT" },
-    { stt: 32, sbd: "11A132", name: "Nguyễn Thị Ngọc Thịnh", dob: "12/12/2010", password: "Thinh122", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "NT" },
-    { stt: 33, sbd: "11A133", name: "Nguyễn Võ Cát Tiên", dob: "19/04/2010", password: "Tien419", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "NT" },
-    { stt: 34, sbd: "11A134", name: "Phạm Thị Thùy Trang", dob: "22/03/2010", password: "Trang322", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "PT" },
-    { stt: 35, sbd: "11A135", name: "Trần Phạm Thanh Trúc", dob: "09/08/2010", password: "Truc809", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TT" },
-    { stt: 36, sbd: "11A136", name: "Dương Trần Duy Tùng", dob: "25/07/2010", password: "Tung725", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "DT" },
-    { stt: 37, sbd: "11A137", name: "Lê Phương Uyên", dob: "16/04/2010", password: "Uyen416", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "LU" },
-    { stt: 38, sbd: "11A138", name: "Nguyễn Lương Ngọc Uyên", dob: "11/02/2010", password: "Uyen211", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "NU" },
-    { stt: 39, sbd: "11A139", name: "Bùi Nguyễn Thi Vũ", dob: "02/01/2010", password: "Vu102", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "BV" },
-    { stt: 40, sbd: "11A140", name: "Nguyễn Ngọc Bích Vy", dob: "21/04/2010", password: "Vy421", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "NV" },
-    { stt: 41, sbd: "11A141", name: "Trần Thị Phương Vy", dob: "07/07/2010", password: "Vy707", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TV" }
+    { stt: 1, sbd: "11A1_01", sbd_alt: "11A101", name: "Nguyễn Minh An", dob: "09/08/2010", password: "An@167", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "NA" },
+    { stt: 2, sbd: "11A1_02", sbd_alt: "11A102", name: "Trần Nữ Gia Anh", dob: "22/06/2010", password: "Anh@897", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TA" },
+    { stt: 3, sbd: "11A1_03", sbd_alt: "11A103", name: "Trần Lâm Hoài Ân", dob: "22/06/2010", password: "An@132", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TÂ" },
+    { stt: 4, sbd: "11A1_04", sbd_alt: "11A104", name: "Nguyễn Công Danh", dob: "14/09/2010", password: "Danh@266", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "ND" },
+    { stt: 5, sbd: "11A1_05", sbd_alt: "11A105", name: "Nguyễn Châu Quốc Duy", dob: "23/12/2010", password: "Duy@532", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "ND" },
+    { stt: 6, sbd: "11A1_06", sbd_alt: "11A106", name: "Đặng Văn Đạt", dob: "29/03/2010", password: "Dat@332", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "ĐĐ" },
+    { stt: 7, sbd: "11A1_07", sbd_alt: "11A107", name: "Trần Quốc Hào", dob: "07/01/2010", password: "Hao@845", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TH" },
+    { stt: 8, sbd: "11A1_08", sbd_alt: "11A108", name: "Dương Gia Hân", dob: "12/10/2010", password: "Han@121", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "DH" },
+    { stt: 9, sbd: "11A1_09", sbd_alt: "11A109", name: "Lê Gia Hùng", dob: "29/09/2010", password: "Hung@790", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "LH" },
+    { stt: 10, sbd: "11A1_10", sbd_alt: "11A110", name: "Nguyễn Lê Quốc Hùng", dob: "01/01/2010", password: "Hung@115", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "NH" },
+    { stt: 11, sbd: "11A1_11", sbd_alt: "11A111", name: "Trần Nguyễn Anh Khôi", dob: "02/09/2010", password: "Khoi@213", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TK" },
+    { stt: 12, sbd: "11A1_12", sbd_alt: "11A112", name: "Trương Quỳnh Mai", dob: "03/03/2010", password: "Mai@792", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TM" },
+    { stt: 13, sbd: "11A1_13", sbd_alt: "11A113", name: "Lê Hoàng My", dob: "03/02/2010", password: "My@374", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "LM" },
+    { stt: 14, sbd: "11A1_14", sbd_alt: "11A114", name: "Võ Nhật Nam", dob: "20/08/2010", password: "Nam@750", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "VN" },
+    { stt: 15, sbd: "11A1_15", sbd_alt: "11A115", name: "Trần Khánh Ngân", dob: "09/03/2010", password: "Ngan@405", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TN" },
+    { stt: 16, sbd: "11A1_16", sbd_alt: "11A116", name: "Võ Thị Thu Ngân", dob: "07/10/2010", password: "Ngan@180", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "VN" },
+    { stt: 17, sbd: "11A1_17", sbd_alt: "11A117", name: "Lê Yến Nhi", dob: "20/07/2010", password: "Nhi@424", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "LN" },
+    { stt: 18, sbd: "11A1_18", sbd_alt: "11A118", name: "Phạm Ngọc Thảo Nhi", dob: "21/03/2010", password: "Nhi@872", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "PN" },
+    { stt: 19, sbd: "11A1_19", sbd_alt: "11A119", name: "Trần Ngọc Yến Oanh", dob: "06/11/2010", password: "Oanh@862", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TO" },
+    { stt: 20, sbd: "11A1_20", sbd_alt: "11A120", name: "Trần Ngọc Phúc", dob: "30/03/2010", password: "Phuc@189", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TP" },
+    { stt: 21, sbd: "11A1_21", sbd_alt: "11A121", name: "Nguyễn Thị Kim Phụng", dob: "03/08/2010", password: "Phung@304", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "NP" },
+    { stt: 22, sbd: "11A1_22", sbd_alt: "11A122", name: "Đỗ Vũ Kim Phượng", dob: "27/06/2010", password: "Phuong@627", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "ĐP" },
+    { stt: 23, sbd: "11A1_23", sbd_alt: "11A123", name: "Nguyễn Thị Thúy Quyên", dob: "10/04/2010", password: "Quyen@410", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "NQ" },
+    { stt: 24, sbd: "11A1_24", sbd_alt: "11A124", name: "Nguyễn Thị Như Quỳnh", dob: "10/09/2010", password: "Quynh@910", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "NQ" },
+    { stt: 25, sbd: "11A1_25", sbd_alt: "11A125", name: "Trần Lê Bảo Quỳnh", dob: "08/02/2010", password: "Quynh@208", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TQ" },
+    { stt: 26, sbd: "11A1_26", sbd_alt: "11A126", name: "Nguyễn Cao Sang", dob: "02/11/2010", password: "Sang@112", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "NS" },
+    { stt: 27, sbd: "11A1_27", sbd_alt: "11A127", name: "Võ Nguyễn Minh Sơn", dob: "01/12/2010", password: "Son@121", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "VS" },
+    { stt: 28, sbd: "11A1_28", sbd_alt: "11A128", name: "Huỳnh Đặng Thanh Thảo", dob: "31/07/2010", password: "Thao@731", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "HT" },
+    { stt: 29, sbd: "11A1_29", sbd_alt: "11A129", name: "Huỳnh Bảo Thi", dob: "04/10/2010", password: "Thi@104", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "HT" },
+    { stt: 30, sbd: "11A1_30", sbd_alt: "11A130", name: "Hồ Hữu Kim Thiên", dob: "14/06/2010", password: "Thien@614", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "HT" },
+    { stt: 31, sbd: "11A1_31", sbd_alt: "11A131", name: "Cao Tấn Thịnh", dob: "20/05/2010", password: "Thinh@520", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "CT" },
+    { stt: 32, sbd: "11A1_32", sbd_alt: "11A132", name: "Nguyễn Thị Ngọc Thịnh", dob: "12/12/2010", password: "Thinh@122", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "NT" },
+    { stt: 33, sbd: "11A1_33", sbd_alt: "11A133", name: "Nguyễn Võ Cát Tiên", dob: "19/04/2010", password: "Tien@419", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "NT" },
+    { stt: 34, sbd: "11A1_34", sbd_alt: "11A134", name: "Phạm Thị Thùy Trang", dob: "22/03/2010", password: "Trang@322", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "PT" },
+    { stt: 35, sbd: "11A1_35", sbd_alt: "11A135", name: "Trần Phạm Thanh Trúc", dob: "09/08/2010", password: "Truc@809", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TT" },
+    { stt: 36, sbd: "11A1_36", sbd_alt: "11A136", name: "Dương Trần Duy Tùng", dob: "25/07/2010", password: "Tung@725", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "DT" },
+    { stt: 37, sbd: "11A1_37", sbd_alt: "11A137", name: "Lê Phương Uyên", dob: "16/04/2010", password: "Uyen@416", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "LU" },
+    { stt: 38, sbd: "11A1_38", sbd_alt: "11A138", name: "Nguyễn Lương Ngọc Uyên", dob: "11/02/2010", password: "Uyen@211", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "NU" },
+    { stt: 39, sbd: "11A1_39", sbd_alt: "11A139", name: "Bùi Nguyễn Thi Vũ", dob: "02/01/2010", password: "Vu@102", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "BV" },
+    { stt: 40, sbd: "11A1_40", sbd_alt: "11A140", name: "Nguyễn Ngọc Bích Vy", dob: "21/04/2010", password: "Vy@421", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "NV" },
+    { stt: 41, sbd: "11A1_41", sbd_alt: "11A141", name: "Trần Thị Phương Vy", dob: "07/07/2010", password: "Vy@707", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TV" }
 ];
 
 function generateClass11A1() {
     return INITIAL_STUDENTS_11A1.map(s => ({
         ...s,
+        username: s.sbd,
         status: "active",
         warnings: 0,
         progress: 0,

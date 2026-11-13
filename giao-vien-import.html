@@ -12,6 +12,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Exam Data & Student Reference -->
+    <script src="js/exam-data.js"></script>
     <style>
         @media print {
             body { background: white !important; font-size: 11px; }
@@ -258,27 +260,14 @@
             if (e.target.files.length > 0) processFile(e.target.files[0]);
         });
 
-        // Nút nạp nhanh 41 học sinh Lớp 11A1
+        // Nút nạp nhanh 41 học sinh Lớp 11A1 với Mật khẩu chuẩn đồng bộ
         document.getElementById('btn-sample-11a1').addEventListener('click', () => {
-            const raw11A1 = [
-                "Nguyễn Minh An", "Trần Nữ Gia Anh", "Trần Lâm Hoài Ân", "Nguyễn Công Danh",
-                "Nguyễn Châu Quốc Duy", "Đặng Văn Đạt", "Trần Quốc Hào", "Dương Gia Hân",
-                "Lê Gia Hùng", "Nguyễn Lê Quốc Hùng", "Trần Nguyễn Anh Khôi", "Trương Quỳnh Mai",
-                "Lê Hoàng My", "Võ Nhật Nam", "Trần Khánh Ngân", "Võ Thị Thu Ngân",
-                "Lê Yến Nhi", "Phạm Ngọc Thảo Nhi", "Trần Ngọc Yến Oanh", "Trần Ngọc Phúc",
-                "Nguyễn Thị Kim Phụng", "Đỗ Vũ Kim Phượng", "Nguyễn Thị Thúy Quyên", "Nguyễn Thị Như Quỳnh",
-                "Trần Lê Bảo Quỳnh", "Nguyễn Cao Sang", "Võ Nguyễn Minh Sơn", "Huỳnh Đặng Thanh Thảo",
-                "Huỳnh Bảo Thi", "Hồ Hữu Kim Thiên", "Cao Tấn Thịnh", "Nguyễn Thị Ngọc Thịnh",
-                "Nguyễn Võ Cát Tiên", "Phạm Thị Thùy Trang", "Trần Phạm Thanh Trúc", "Dương Trần Duy Tùng",
-                "Lê Phương Uyên", "Nguyễn Lương Ngọc Uyên", "Bùi Nguyễn Thi Vũ", "Nguyễn Ngọc Bích Vy",
-                "Trần Thị Phương Vy"
-            ];
-
-            const rows = [["STT", "HoTen", "TenLop"]];
-            raw11A1.forEach((name, idx) => {
-                rows.push([idx + 1, name, "11A1"]);
-            });
-
+            const rows = [["STT", "HoTen", "TenLop", "MatKhau"]];
+            if (typeof INITIAL_STUDENTS_11A1 !== 'undefined') {
+                INITIAL_STUDENTS_11A1.forEach(s => {
+                    rows.push([s.stt, s.name, "11A1", s.password]);
+                });
+            }
             processStudentRows(rows);
         });
 
