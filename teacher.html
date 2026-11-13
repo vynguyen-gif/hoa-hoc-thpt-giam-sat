@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thầy Nguyễn Vỹ - Bảng Giám Sát Live Hóa Học 12 KNTT & Chống Gian Lận</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- TOP HEADER THEO ĐÚNG ẢNH 1 & 2 -->
+        <header class="top-header">
+            <div class="teacher-brand">
+                <div class="teacher-avatar-icon">
+                    <i class="fa-solid fa-flask-vial"></i>
+                </div>
+                <div class="brand-text-wrap">
+                    <div class="brand-title-line">
+                        <span class="teacher-name" id="displayTeacherName">Thầy Nguyễn Vỹ</span>
+                        <span class="badge-subject" id="displayTeacherTitle">Giáo Viên Hóa Học 12</span>
+                    </div>
+                    <div class="brand-subtitle" id="displayTeacherSubtitle">Bảng Giám Sát Live SGK KNTT & Chống Gian Lận Phòng Thí Nghiệm / Phòng Máy</div>
+                </div>
+            </div>
+
+            <!-- Fast Search ID 4 số -->
+            <div class="fast-search-group">
+                <i class="fa-solid fa-magnifying-glass" style="color: #94a3b8; font-size: 13px;"></i>
+                <input type="text" id="quickIdInput" class="fast-search-input" placeholder="Soi nhanh ID 4 số (vd: 2101)..." maxlength="6">
+                <button type="button" class="btn-soi-live" id="btnQuickInspect">
+                    Soi Live <i class="fa-solid fa-chevron-right" style="font-size: 11px;"></i>
+                </button>
+            </div>
+
+            <!-- Header Action Icons -->
+            <div class="header-actions">
+                <button type="button" class="btn-pill-action" id="btnVoiceToggle" title="Bật/Tắt giọng đọc cảnh báo học sinh gian lận">
+                    <i class="fa-solid fa-volume-xmark" id="voiceIcon"></i>
+                    <span id="voiceText">Giọng đọc: TẮT</span>
+                </button>
+                <button type="button" class="btn-icon-circle" id="btnRefreshData" title="Làm mới dữ liệu">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                </button>
+                <button type="button" class="btn-icon-circle" id="btnThemeToggle" title="Chuyển chế độ sáng/tối">
+                    <i class="fa-regular fa-moon"></i>
+                </button>
+                <a href="student.html" target="_blank" class="btn-pill-action" title="Mở trang làm bài học sinh trong tab mới">
+                    <i class="fa-solid fa-graduation-cap"></i> Học sinh
+                </a>
+                <button type="button" class="btn-icon-circle" id="btnResetSimulation" title="Khôi phục trạng thái mô phỏng ban đầu">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- 4 THẺ THỐNG KÊ (METRIC STAT CARDS) -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-info">
+                    <span class="stat-label">Tổng số học sinh</span>
+                    <span class="stat-value" id="statTotalStudents">36</span>
+                </div>
+                <div class="stat-icon-wrap stat-icon-users">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-info">
+                    <span class="stat-label">Đang trực tuyến</span>
+                    <span class="stat-value" id="statOnlineStudents">2 <small>/ 36</small></span>
+                </div>
+                <div class="stat-icon-wrap stat-icon-online">
+                    <i class="fa-solid fa-signal"></i>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-info">
+                    <span class="stat-label">Đang làm bài live</span>
+                    <span class="stat-value" id="statActiveWriting">1</span>
+                </div>
+                <div class="stat-icon-wrap stat-icon-live">
+                    <i class="fa-solid fa-flask"></i>
+                </div>
+            </div>
+
+            <div class="stat-card alert-card">
+                <div class="stat-info">
+                    <span class="stat-label">Cảnh báo rời màn hình</span>
+                    <span class="stat-value" id="statLeavingAlert">1 <small style="color: #dc2626; font-size: 14px;">học sinh</small></span>
+                </div>
+                <div class="stat-icon-wrap stat-icon-alert">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+            </div>
+        </section>
+
+        <!-- THANH CHUYỂN TAB NAVIGATION -->
+        <nav class="nav-tabs-bar">
+            <button type="button" class="tab-btn active" data-tab="tab-live-monitor">
+                <i class="fa-regular fa-eye"></i> Bảng Giám Sát Live
+            </button>
+            <button type="button" class="tab-btn" data-tab="tab-class-manager">
+                <i class="fa-solid fa-users-gear"></i> Quản Lý Lớp & Excel
+            </button>
+            <button type="button" class="tab-btn" data-tab="tab-exercises-bank">
+                <i class="fa-solid fa-book-open"></i> Bài Tập SGK Hóa 12
+            </button>
+            <button type="button" class="tab-btn" data-tab="tab-submissions-grading">
+                <i class="fa-solid fa-award"></i> Quản Lý Bài Gửi & Đánh Giá
+            </button>
+        </nav>
+
+        <!-- BỘ LỌC CHỌN LỚP & BÀI KIỂM TRA -->
+        <section class="filter-bar">
+            <div class="filter-left-controls">
+                <div class="filter-group">
+                    <span class="filter-label">Chọn Lớp:</span>
+                    <select class="filter-select" id="selectClassFilter">
+                        <option value="12C1" selected>12C1</option>
+                        <option value="12C2">12C2</option>
+                        <option value="12A1">12A1</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <span class="filter-label">Bài tập SGK:</span>
+                    <select class="filter-select" id="selectAssignmentFilter">
+                        <option value="kt_thuchanh_12c2" selected>🧪 KT thực hành 12c2</option>
+                        <option value="kt_cacbohidrat_12">⚗️ Khảo sát Glucozơ</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="filter-search-box">
+                <i class="fa-solid fa-magnifying-glass" style="color: #94a3b8; font-size: 13px;"></i>
+                <input type="text" id="inputSearchStudent" class="filter-search-input" placeholder="Tìm theo tên hoặc mã 4 số...">
+            </div>
+        </section>
+
+        <!-- TAB 1: BẢNG GIÁM SÁT LIVE (CARDS GRID - CHUẨN ẢNH 1) -->
+        <main class="tab-content-pane active" id="tab-live-monitor">
+            <div class="live-cards-grid" id="studentsLiveGrid">
+                <!-- Được render bằng JavaScript từ localStorage -->
+            </div>
+        </main>
+
+        <!-- TAB 4: QUẢN LÝ BÀI GỬI & ĐÁNH GIÁ (TABLE VIEW - CHUẨN ẢNH 2) -->
+        <main class="tab-content-pane" id="tab-submissions-grading" style="display: none;">
+            <div class="table-view-section">
+                <!-- Action Buttons trên cùng bảng -->
+                <div class="table-top-actions">
+                    <div class="filter-group" style="padding: 6px 14px;">
+                        <span class="filter-label"><i class="fa-solid fa-filter"></i> Lọc nhanh:</span>
+                        <span style="font-size: 13px; font-weight: 600; color: #0284c7;">Lớp 12C1 • KT thực hành 12c2</span>
+                    </div>
+
+                    <div class="table-action-buttons">
+                        <button type="button" class="btn-table-action" id="btnReopenSubmissions">
+                            <i class="fa-solid fa-arrow-rotate-left"></i> Mở Lại <span id="reopenCount">33</span> Bài Nộp
+                        </button>
+                        <button type="button" class="btn-table-action" id="btnAutoGrade" style="color: #b45309; border-color: #fde68a; background: #fffbeb;">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Chấm Tự Động
+                        </button>
+                        <button type="button" class="btn-table-action" id="btnDownloadSummaryZip">
+                            <i class="fa-solid fa-box-archive"></i> Tải File Tổng Hợp
+                        </button>
+                        <button type="button" class="btn-table-action btn-export-excel" id="btnExportExcel">
+                            <i class="fa-solid fa-download"></i> Xuất Excel
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Status Filter Chips (Ảnh 2) -->
+                <div class="status-chips-bar">
+                    <span style="font-size: 12.5px; font-weight: 600; color: #64748b; margin-right: 6px;">
+                        <i class="fa-solid fa-filter"></i> Trạng thái:
+                    </span>
+                    <button type="button" class="chip-status" data-filter="all">Tất cả <span id="chipAllCount">36</span></button>
+                    <button type="button" class="chip-status active" data-filter="submitted">Đã nộp <span id="chipSubmittedCount">33</span></button>
+                    <button type="button" class="chip-status" data-filter="unsubmitted">Chưa nộp <span id="chipUnsubmittedCount">3</span></button>
+                    <button type="button" class="chip-status" data-filter="graded">Đã chấm <span id="chipGradedCount">33</span></button>
+                    <button type="button" class="chip-status" data-filter="ungraded">Chưa chấm <span id="chipUngradedCount">0</span></button>
+                    <button type="button" class="chip-status" data-filter="left_tab" style="color: #b45309;">
+                        ⚠️ Rời tab <span id="chipLeftTabCount">32</span>
+                    </button>
+                </div>
+
+                <!-- Bảng danh sách kết quả học sinh -->
+                <div class="table-responsive-wrapper">
+                    <table class="custom-chem-table" id="gradingSubmissionsTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px; text-align: center;">
+                                    <input type="checkbox" id="selectAllCheckbox" checked>
+                                </th>
+                                <th style="width: 50px;">STT</th>
+                                <th style="width: 80px;">MÃ ID</th>
+                                <th>HỌ VÀ TÊN</th>
+                                <th>LỚP</th>
+                                <th>BÀI THỰC HÀNH</th>
+                                <th>THỜI GIAN NỘP</th>
+                                <th>DUNG LƯỢNG</th>
+                                <th>TRẠNG THÁI</th>
+                                <th style="width: 90px; text-align: center;">ĐIỂM SỐ</th>
+                                <th>LỜI PHÊ CỦA THẦY VỸ</th>
+                                <th style="text-align: center; width: 100px;">THAO TÁC</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gradingTableBody">
+                            <!-- Render bằng JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+
+        <!-- TAB 2: QUẢN LÝ LỚP & EXCEL -->
+        <main class="tab-content-pane" id="tab-class-manager" style="display: none;">
+            <div class="table-view-section">
+                <div class="table-top-actions">
+                    <div>
+                        <h3 style="font-size: 18px; font-weight: 700; color: #1e293b;">Danh Sách Học Sinh Lớp 12C1 (Hóa Học KNTT)</h3>
+                        <p style="font-size: 13px; color: #64748b; margin-top: 4px;">Quản lý mã định danh 4 số, tài khoản phòng máy và lịch sử điểm số thực nghiệm Hóa học.</p>
+                    </div>
+                    <div class="table-action-buttons">
+                        <button type="button" class="btn-table-action" onclick="alert('Tính năng nhập file Excel danh sách học sinh: Chọn file .xlsx hoặc .csv')">
+                            <i class="fa-solid fa-file-excel" style="color: #16a34a;"></i> Nhập Excel Học Sinh
+                        </button>
+                        <button type="button" class="btn-table-action btn-export-excel" id="btnExportStudentRoster">
+                            <i class="fa-solid fa-file-arrow-down"></i> Tải Danh Sách Lớp
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive-wrapper" style="margin-top: 10px;">
+                    <table class="custom-chem-table">
+                        <thead>
+                            <tr>
+                                <th>MÃ ID 4 SỐ</th>
+                                <th>HỌ VÀ TÊN HỌC SINH</th>
+                                <th>LỚP</th>
+                                <th>TRẠNG THÁI TÀI KHOẢN</th>
+                                <th>CHỈ SỐ LIÊM CHÍNH TRUNG BÌNH</th>
+                                <th>ĐIỂM TRUNG BÌNH THỰC HÀNH</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rosterTableBody">
+                            <!-- Render JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+
+        <!-- TAB 3: NGÂN HÀNG BÀI TẬP SGK HÓA 12 -->
+        <main class="tab-content-pane" id="tab-exercises-bank" style="display: none;">
+            <div class="table-view-section">
+                <div class="table-top-actions">
+                    <div>
+                        <h3 style="font-size: 18px; font-weight: 700; color: #1e293b;">Ngân Hàng Bài Tập & Thực Hành Hóa Học 12 (KNTT)</h3>
+                        <p style="font-size: 13px; color: #64748b; margin-top: 4px;">Hệ thống bài kiểm tra chống gian lận bám sát ma trận đề thi 2025 của Bộ GD&ĐT.</p>
+                    </div>
+                    <button type="button" class="btn-table-action btn-export-excel" onclick="alert('Đã mở form tạo bài kiểm tra Hóa học mới.')">
+                        <i class="fa-solid fa-plus"></i> Tạo Bài Kiểm Tra Mới
+                    </button>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px; margin-top: 14px;">
+                    <div style="background: var(--bg-page); border-radius: 16px; padding: 20px; border: 1px solid var(--border-color);">
+                        <span style="background: #e0f2fe; color: #0284c7; font-weight: 700; font-size: 11px; padding: 4px 10px; border-radius: 9999px;">BÀI THỰC HÀNH ĐANG CHẠY</span>
+                        <h4 style="margin: 10px 0 6px; font-size: 16px; font-weight: 700;">🧪 KT thực hành 12c2: Điều chế & Thử tính chất Este</h4>
+                        <p style="font-size: 13px; color: #64748b; line-height: 1.5;">Gồm 4 câu trắc nghiệm 4 phương án, 1 câu trắc nghiệm Đúng/Sai (4 ý a,b,c,d) và 1 câu tự luận viết PTHH este hóa.</p>
+                        <div style="margin-top: 14px; display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 12px; font-weight: 600; color: #0284c7;">Thời gian: 45 phút • Thang 10đ</span>
+                            <button class="btn-table-action" style="padding: 4px 12px; font-size: 12px;" onclick="window.open('student.html?id=2101', '_blank')">Xem đề</button>
+                        </div>
+                    </div>
+
+                    <div style="background: var(--bg-page); border-radius: 16px; padding: 20px; border: 1px solid var(--border-color);">
+                        <span style="background: #f1f5f9; color: #64748b; font-weight: 700; font-size: 11px; padding: 4px 10px; border-radius: 9999px;">DỰ BỊ</span>
+                        <h4 style="margin: 10px 0 6px; font-size: 16px; font-weight: 700;">⚗️ Khảo sát tính chất Glucozơ, Fructozơ và Saccarozơ</h4>
+                        <p style="font-size: 13px; color: #64748b; line-height: 1.5;">Phản ứng tráng bạc Ag, phản ứng hòa tan kết tủa Cu(OH)2 tạo phức xanh lam đặc trưng.</p>
+                        <div style="margin-top: 14px; display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 12px; font-weight: 600; color: #64748b;">Thời gian: 45 phút • Thang 10đ</span>
+                            <button class="btn-table-action" style="padding: 4px 12px; font-size: 12px;">Chỉnh sửa</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ==========================================================================
+         MODAL SOI LIVE & CHẤM ĐIỂM (LIVE INSPECTOR MODAL)
+         ========================================================================== -->
+    <div class="modal-overlay" id="inspectModal">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <div class="modal-header-left">
+                    <div class="teacher-avatar-icon" style="width: 38px; height: 38px; font-size: 18px; background: #0284c7;">
+                        <i class="fa-solid fa-eye"></i>
+                    </div>
+                    <div>
+                        <div class="modal-header-title">
+                            <span id="modalStudentName">Phạm Văn Danh</span> 
+                            <span class="id-badge" id="modalStudentId" style="margin-left: 6px;">ID: 2102</span>
+                            <span class="badge-subject" style="background: #dbeafe; color: #0284c7; margin-left: 6px;" id="modalStudentClass">12C1</span>
+                        </div>
+                        <div style="font-size: 12px; color: #64748b;" id="modalExamName">🧪 KT thực hành 12c2: Điều chế và thử tính chất Este</div>
+                    </div>
+                </div>
+                <button type="button" class="modal-close-btn" id="modalCloseBtn">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Banner cảnh báo vi phạm nếu có -->
+                <div id="modalAlertBox" style="display: none;" class="warning-pill-banner warning-leaving">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span id="modalAlertText">⚠️ ĐANG RỜI TAB KHỎI BÀI THI!</span>
+                </div>
+
+                <!-- Khung Soi Trực Tiếp Bài Làm (Live Stream / Keylogger View) -->
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 13.5px; font-weight: 700; color: #1e293b;">
+                            <i class="fa-solid fa-keyboard" style="color: #0284c7;"></i> Màn hình gõ bài Hóa học trực tiếp (Realtime Live):
+                        </span>
+                        <span style="font-size: 12px; color: #64748b;" id="modalLastKeyTime">Cập nhật: vài giây trước</span>
+                    </div>
+
+                    <div class="live-stream-box">
+                        <div class="live-indicator">LIVE FEED</div>
+                        <div id="modalLiveCodeContent" style="white-space: pre-wrap; word-break: break-all;">
+                            1. CH3COOH + C2H5OH <==> CH3COOC2H5 + H2O (xt: H2SO4 dac, t°)<br>
+                            2. Phan ung thuan nghich nen luon con du chat tham gia.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lịch sử rời tab & Chỉ số liêm chính -->
+                <div class="cheat-history-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <span style="font-size: 13.5px; font-weight: 700; color: #dc2626;">
+                            <i class="fa-solid fa-shield-halved"></i> Nhật ký phát hiện gian lận & Rời màn hình:
+                        </span>
+                        <span style="font-size: 12.5px; font-weight: 700;" id="modalIntegrityScore">Chỉ số liêm chính: 60%</span>
+                    </div>
+
+                    <div id="modalLeaveHistoryList" style="max-height: 140px; overflow-y: auto;">
+                        <!-- Render items -->
+                    </div>
+                </div>
+
+                <!-- Chấm điểm và Lời phê của Thầy Vỹ -->
+                <div style="display: grid; grid-template-columns: 140px 1fr; gap: 14px;">
+                    <div>
+                        <label style="font-size: 12.5px; font-weight: 700; color: #1e293b; display: block; margin-bottom: 6px;">Điểm số (Thang 10):</label>
+                        <input type="number" id="modalInputScore" step="0.5" min="0" max="10" value="4.0" 
+                            style="width: 100%; padding: 10px; border-radius: 12px; border: 1px solid #cbd5e1; font-size: 16px; font-weight: 800; color: #0284c7; text-align: center;">
+                    </div>
+                    <div>
+                        <label style="font-size: 12.5px; font-weight: 700; color: #1e293b; display: block; margin-bottom: 6px;">Lời phê của Thầy Vỹ:</label>
+                        <input type="text" id="modalInputFeedback" value="Em hoàn thành tốt; Cần chú ý hơn cơ chế H2SO4 đặc và cân bằng PTHH este."
+                            style="width: 100%; padding: 10px 14px; border-radius: 12px; border: 1px solid #cbd5e1; font-size: 13.5px; color: #1e293b;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-table-action" id="btnSendTeacherAlert" style="color: #dc2626; border-color: #fca5a5; background: #fff1f2;">
+                    <i class="fa-solid fa-bell"></i> ⚡ Gửi Cảnh Báo Cho Học Sinh
+                </button>
+
+                <div class="modal-footer-actions">
+                    <button type="button" class="btn-table-action" id="modalCloseBtn2">Đóng</button>
+                    <button type="button" class="btn-pill-action active-voice" id="btnSaveGrading">
+                        <i class="fa-solid fa-floppy-disk"></i> Lưu Đánh Giá & Điểm Số
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/channel.js"></script>
+    <script src="js/teacher.js"></script>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Giám Sát Live Hóa Học THPT & Chống Gian Lận - Thầy Nguyễn Vỹ</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .portal-hero {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 50%, #075985 100%);
+            border-radius: 28px;
+            padding: 40px;
+            color: #ffffff;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 12px 30px rgba(2, 132, 199, 0.25);
+        }
+        .portal-hero::after {
+            content: '⚗️';
+            position: absolute;
+            right: 20px;
+            bottom: -20px;
+            font-size: 160px;
+            opacity: 0.12;
+            pointer-events: none;
+        }
+        .portal-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            margin-bottom: 28px;
+        }
+        @media (max-width: 800px) {
+            .portal-grid { grid-template-columns: 1fr; }
+        }
+        .portal-card-btn {
+            background: var(--card-bg);
+            border-radius: 22px;
+            padding: 30px;
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-sm);
+            text-decoration: none;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .portal-card-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+            border-color: #38bdf8;
+        }
+        .portal-icon-big {
+            width: 60px;
+            height: 60px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        .btn-launch-pill {
+            margin-top: 24px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 9999px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #ffffff;
+            width: fit-content;
+            transition: all 0.2s;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container" style="max-width: 1200px; padding-top: 30px;">
+        <!-- HERO BANNER -->
+        <div class="portal-hero">
+            <span style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(4px); padding: 5px 14px; border-radius: 9999px; font-size: 12.5px; font-weight: 700; letter-spacing: 0.5px;">
+                🧪 CHƯƠNG TRÌNH HÓA HỌC 12 - SGK KẾT NỐI TRI THỨC (KNTT)
+            </span>
+            <h1 style="font-size: 32px; font-weight: 800; margin: 16px 0 10px; letter-spacing: -0.5px;">
+                Hệ Thống Giám Sát Live & Chống Gian Lận Phòng Thí Nghiệm
+            </h1>
+            <p style="font-size: 15px; opacity: 0.92; max-width: 720px; line-height: 1.6;">
+                Nền tảng kiểm tra trực tuyến môn Hóa học THPT mô phỏng chuẩn xác 100% giao diện và hệ thống giám sát của Thầy Trần Thạch môn Tin học, tùy biến chuyên sâu cho <strong>Thầy Nguyễn Vỹ</strong> với bộ câu hỏi thực hành Este - Lipit - Cacbohidrat và cơ chế phát hiện rời tab tức thì.
+            </p>
+        </div>
+
+        <!-- 2 LỰA CHỌN TRANG WEB -->
+        <div class="portal-grid">
+            <!-- 1. TRANG GIÁO VIÊN -->
+            <a href="teacher.html" class="portal-card-btn">
+                <div>
+                    <div class="portal-icon-big" style="background: #e0f2fe; color: #0284c7;">
+                        <i class="fa-solid fa-chalkboard-user"></i>
+                    </div>
+                    <span style="background: #ffe4e6; color: #e11d48; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 9999px;">DÀNH CHO GIÁO VIÊN</span>
+                    <h2 style="font-size: 22px; font-weight: 800; margin: 10px 0 6px; color: #1e293b;">Trang Web Của Thầy Nguyễn Vỹ</h2>
+                    <p style="font-size: 13.5px; color: #64748b; line-height: 1.6;">
+                        Bảng Giám Sát Live 36 học sinh lớp 12C1, theo dõi học sinh đang gõ PTHH live, cảnh báo học sinh rời tab (viền đỏ nhấp nháy), soi màn hình làm bài chi tiết, chấm tự động và xuất file Excel.
+                    </p>
+                    <ul style="font-size: 12.5px; color: #475569; margin-top: 14px; padding-left: 20px; line-height: 1.6;">
+                        <li>Bảng Giám Sát Live (Chuẩn ảnh 1 môn Tin)</li>
+                        <li>Quản lý bài gửi, chấm điểm & xuất Excel (Chuẩn ảnh 2 môn Tin)</li>
+                        <li>Đọc cảnh báo bằng giọng nói tiếng Việt tự động</li>
+                        <li>Bắn cảnh báo trực tiếp sang màn hình học sinh</li>
+                    </ul>
+                </div>
+                <div class="btn-launch-pill" style="background: #0284c7;">
+                    Truy Cập Giao Diện Giáo Viên <i class="fa-solid fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <!-- 2. TRANG HỌC SINH -->
+            <a href="student.html" class="portal-card-btn">
+                <div>
+                    <div class="portal-icon-big" style="background: #dcfce7; color: #16a34a;">
+                        <i class="fa-solid fa-user-graduate"></i>
+                    </div>
+                    <span style="background: #dbeafe; color: #0284c7; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 9999px;">DÀNH CHO HỌC SINH</span>
+                    <h2 style="font-size: 22px; font-weight: 800; margin: 10px 0 6px; color: #1e293b;">Trang Web Của Học Sinh</h2>
+                    <p style="font-size: 13.5px; color: #64748b; line-height: 1.6;">
+                        Phòng làm bài thi trắc nghiệm & tự luận Hóa 12 (Điều chế Este, xà phòng hóa). Trang bị hệ thống cảm biến chống gian lận tự động phát hiện chuyển tab, mở AI/Google và chuông báo động.
+                    </p>
+                    <ul style="font-size: 12.5px; color: #475569; margin-top: 14px; padding-left: 20px; line-height: 1.6;">
+                        <li>Đăng nhập nhanh theo ID 4 số (2101, 2102, ...)</li>
+                        <li>Trắc nghiệm 4 lựa chọn + Trắc nghiệm Đúng/Sai 2025</li>
+                        <li>Viết PTHH có bàn phím ký hiệu hóa học ảo</li>
+                        <li>Báo động đỏ khi rời tab và truyền trực tiếp về máy Thầy Vỹ</li>
+                    </ul>
+                </div>
+                <div class="btn-launch-pill" style="background: #16a34a;">
+                    Truy Cập Giao Diện Học Sinh <i class="fa-solid fa-arrow-right"></i>
+                </div>
+            </a>
+        </div>
+
+        <!-- TÍNH NĂNG TRẢI NGHIỆM CHIA ĐÔI MÀN HÌNH -->
+        <div style="background: var(--card-bg); border-radius: 20px; padding: 24px 30px; border: 1px solid var(--border-light); box-shadow: var(--shadow-sm); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <div style="width: 48px; height: 48px; border-radius: 14px; background: #fffbeb; color: #d97706; display: flex; align-items: center; justify-content: center; font-size: 22px;">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <div>
+                    <h4 style="font-size: 16px; font-weight: 700; color: #1e293b;">Mẹo Trải Nghiệm Thử Nghiệm Gian Lận Live:</h4>
+                    <p style="font-size: 13px; color: #64748b; margin-top: 2px;">
+                        Mở <strong>teacher.html</strong> ở một tab và <strong>student.html</strong> ở một tab khác. Thử chuyển tab bên học sinh, bên giáo viên sẽ lập tức phát chuông báo động và hiển thị viền đỏ rực rỡ!
+                    </p>
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button type="button" class="btn-table-action" onclick="window.open('teacher.html', '_blank', 'width=900,height=800,left=50,top=50')">
+                    <i class="fa-solid fa-chalkboard-user"></i> Cửa sổ Giáo Viên
+                </button>
+                <button type="button" class="btn-table-action" onclick="window.open('student.html', '_blank', 'width=900,height=800,left=1000,top=50')">
+                    <i class="fa-solid fa-user-graduate"></i> Cửa sổ Học Sinh
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
