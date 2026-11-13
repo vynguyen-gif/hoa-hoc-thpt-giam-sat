@@ -1,0 +1,137 @@
+/* Custom Styles for Chemistry Online Examination System */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+code, pre, .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+}
+
+/* Chemical formula sub & sup formatting */
+sub {
+    font-size: 0.72em;
+    vertical-align: sub;
+    line-height: 0;
+}
+
+sup {
+    font-size: 0.72em;
+    vertical-align: super;
+    line-height: 0;
+}
+
+/* Anti-cheating & selection prevention */
+.unselectable {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+/* Watermark background for exam to prevent taking photos */
+.exam-watermark {
+    background-image: radial-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+    background-size: 24px 24px;
+    position: relative;
+}
+
+.exam-watermark::before {
+    content: attr(data-watermark);
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-25deg);
+    font-size: 4rem;
+    font-weight: 800;
+    color: rgba(148, 163, 184, 0.04);
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 1;
+    user-select: none;
+}
+
+/* Pulsing indicators for Live Monitor */
+@keyframes pulse-emerald {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(1.15); }
+}
+
+@keyframes pulse-rose {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.3; transform: scale(1.25); }
+}
+
+.pulse-active {
+    animation: pulse-emerald 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.pulse-danger {
+    animation: pulse-rose 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Keystroke blinking cursor for Live Docs Viewer */
+@keyframes blink-cursor {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+.typing-cursor::after {
+    content: "▋";
+    display: inline-block;
+    color: #2563eb;
+    margin-left: 2px;
+    animation: blink-cursor 0.9s infinite;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Smooth Tab Transitions */
+.view-panel {
+    transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.view-panel.hidden {
+    display: none !important;
+    opacity: 0;
+    transform: scale(0.99);
+}
+
+/* Radio button & Checkbox custom styling for Chemistry true/false items */
+.chem-choice-label {
+    transition: all 0.15s ease;
+}
+
+.chem-choice-label:hover {
+    border-color: #93c5fd;
+    background-color: #f8fafc;
+}
+
+.chem-choice-label.selected {
+    border-color: #2563eb;
+    background-color: #eff6ff;
+}
+
+/* Drag & Drop Highlight */
+.dropzone-active {
+    border-color: #3b82f6 !important;
+    background-color: #eff6ff !important;
+}
