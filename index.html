@@ -81,7 +81,7 @@
                         <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
                             Số Báo Danh (SBD) / Mã Học Sinh
                         </label>
-                        <input type="text" id="student-sbd-input" value="10A301" placeholder="Ví dụ: 10A301" required
+                        <input type="text" id="student-sbd-input" value="11A101" placeholder="Ví dụ: 11A101" required
                             class="w-full py-2.5 px-3.5 rounded-xl border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-sm font-medium uppercase transition">
                     </div>
 
@@ -89,7 +89,7 @@
                         <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
                             Họ và Tên Thí Sinh
                         </label>
-                        <input type="text" id="student-name-input" value="Nguyễn Hoàng An" placeholder="Nhập họ tên đầy đủ"
+                        <input type="text" id="student-name-input" value="Nguyễn Minh An" placeholder="Nhập họ tên đầy đủ"
                             class="w-full py-2.5 px-3.5 rounded-xl border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-sm font-medium transition">
                     </div>
 
@@ -388,8 +388,8 @@
                 <!-- TOP STATS CARDS -->
                 <div class="grid grid-cols-2 md:grid-cols-5 gap-3.5">
                     <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                        <span class="text-xs text-slate-500 block font-medium">Tổng thí sinh</span>
-                        <span id="stat-total-students" class="text-2xl font-black text-slate-900 font-mono">47</span>
+                        <span class="text-xs text-slate-500 block font-medium">Tổng thí sinh (11A1)</span>
+                        <span id="stat-total-students" class="text-2xl font-black text-slate-900 font-mono">41</span>
                     </div>
                     <div class="bg-white p-4 rounded-xl border border-emerald-200 shadow-sm bg-emerald-50/20">
                         <span class="text-xs text-emerald-700 block font-medium flex items-center gap-1">
@@ -451,11 +451,18 @@
 
                 <!-- RESPONSIVE TAILWIND GRID: LIVE STUDENT STATUS CARDS -->
                 <div>
-                    <div class="flex items-center justify-between mb-3">
-                        <h3 class="font-bold text-sm text-slate-800 flex items-center gap-2">
-                            <span>Bảng Giám Sát Thời Gian Thực (Lớp 10A3)</span>
-                            <span class="text-xs font-normal text-slate-400">Click vào thẻ để xem Live Keystroke Tự luận</span>
-                        </h3>
+                    <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+                        <div>
+                            <h3 class="font-bold text-sm text-slate-800 flex items-center gap-2">
+                                <span>Bảng Giám Sát Thời Gian Thực (Lớp 11A1 - 41 Học Sinh)</span>
+                                <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">0 Vi phạm</span>
+                            </h3>
+                            <p class="text-xs text-slate-400">Dữ liệu vi phạm đã được xóa sạch. Click vào thẻ để xem Live Keystroke Tự luận.</p>
+                        </div>
+                        <button id="btn-clear-all-violations" class="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold flex items-center gap-1.5 transition shadow-xs">
+                            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-rose-600"></i>
+                            <span>Xóa Toàn Bộ Cảnh Báo & Mở Khóa Tất Cả</span>
+                        </button>
                     </div>
                     <div id="live-monitor-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         <!-- Dynamic Student Cards Rendered Here -->
@@ -487,8 +494,8 @@
                             <p class="text-xs text-slate-500 mt-0.5">Kéo thả file Excel / CSV danh sách học sinh để tự động tạo mã SBD và mật khẩu</p>
                         </div>
                         <div class="flex items-center gap-2">
-                            <button id="btn-load-sample-10a3" class="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold hover:bg-slate-50 text-slate-700 transition">
-                                Nạp mẫu 47 học sinh (10A3)
+                            <button id="btn-load-sample-11a1" class="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold hover:bg-slate-50 text-slate-700 transition">
+                                Nạp mẫu 41 học sinh (11A1)
                             </button>
                             <button id="btn-export-excel" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
                                 <i data-lucide="download" class="w-3.5 h-3.5"></i>

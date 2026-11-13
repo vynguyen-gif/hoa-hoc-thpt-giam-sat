@@ -1,6 +1,6 @@
 /**
  * PHÂN HỆ GIÁO VIÊN (MINIMALIST DASHBOARD & LIVE MONITOR)
- * Giám sát phòng thi thời gian thực & Quản lý danh sách học sinh với SheetJS
+ * Giám sát phòng thi thời gian thực & Quản lý danh sách học sinh Lớp 11A1 với SheetJS
  */
 
 class TeacherDashboardController {
@@ -25,22 +25,44 @@ class TeacherDashboardController {
     }
 
     loadInitialClassData() {
-        // Khởi tạo danh sách 47 học sinh lớp 10A3
-        const saved = localStorage.getItem('chem_teacher_students_10a3');
-        if (saved) {
-            try {
-                this.students = JSON.parse(saved);
-            } catch (e) {
-                this.students = generateFullClass10A3();
-            }
-        } else {
-            this.students = generateFullClass10A3();
-            this.saveStudentsToStorage();
-        }
+        // Luôn nạp danh sách 41 học sinh lớp 11A1 chuẩn sạch (warnings = 0)
+        this.students = generateClass11A1();
+        this.saveStudentsToStorage();
+        // Xóa sạch log vi phạm cũ
+        this.clearAllViolations();
     }
 
     saveStudentsToStorage() {
-        localStorage.setItem('chem_teacher_students_10a3', JSON.stringify(this.students));
+        localStorage.setItem('chem_teacher_students_11a1', JSON.stringify(this.students));
+    }
+
+    clearAllViolations() {
+        this.students.forEach(s => {
+            s.warnings = 0;
+            s.status = s.progress > 0 ? 'active' : 'active';
+            // Xóa progress/vi phạm lưu trong LocalStorage cho từng SBD
+            localStorage.removeItem(`chem_progress_${s.sbd}`);
+        });
+        this.proctorLogs = [];
+        this.saveStudentsToStorage();
+        this.updateStatsCounters();
+
+        const logContainer = document.getElementById('live-proctor-feed');
+        if (logContainer) {
+            logContainer.innerHTML = `
+                <div class="p-2 rounded text-xs bg-emerald-50 border border-emerald-200 text-emerald-800 font-medium">
+                    [Hệ thống] Đã nạp danh sách 41 học sinh Lớp 11A1 và xóa toàn bộ dữ liệu vi phạm cũ. Toàn bộ học sinh ở trạng thái an toàn.
+                </div>
+            `;
+        }
+
+        // Bắn tín hiệu xóa vi phạm cho toàn bộ học sinh
+        if (window.proctoringService) {
+            window.proctoringService.publish('TEACHER_ACTION', {
+                targetSbd: 'ALL',
+                action: 'UNLOCK'
+            });
+        }
     }
 
     // ==========================================
@@ -69,6 +91,18 @@ class TeacherDashboardController {
             filterSelect.addEventListener('change', (e) => {
                 this.filterStatus = e.target.value;
                 this.renderLiveMonitorGrid();
+            });
+        }
+
+        // Nút xóa toàn bộ vi phạm trên header Live Monitor
+        const clearViolationsBtn = document.getElementById('btn-clear-all-violations');
+        if (clearViolationsBtn) {
+            clearViolationsBtn.addEventListener('click', () => {
+                if (confirm("Bạn có chắc chắn muốn xóa toàn bộ cảnh báo và mở khóa bài cho tất cả học sinh lớp 11A1?")) {
+                    this.clearAllViolations();
+                    this.renderLiveMonitorGrid();
+                    alert("Đã xóa toàn bộ vi phạm và khôi phục trạng thái cho 41 học sinh lớp 11A1!");
+                }
             });
         }
     }
@@ -170,7 +204,6 @@ class TeacherDashboardController {
     handleStudentEvent(sbd, patch, logMessage = null) {
         let student = this.students.find(s => s.sbd === sbd);
         if (!student) {
-            // Tự động thêm vào danh sách nếu thí sinh chưa có sẵn
             student = {
                 sbd,
                 name: patch.name || `Thí sinh ${sbd}`,
@@ -262,7 +295,6 @@ class TeacherDashboardController {
     }
 
     buildCardHtml(student) {
-        // Cấu hình style và badge theo trạng thái
         let statusBadge = '';
         let borderClass = 'border-slate-200 hover:border-slate-300';
         let cardBg = 'bg-white';
@@ -330,12 +362,16 @@ class TeacherDashboardController {
                     <!-- Header thẻ học sinh -->
                     <div class="flex items-start justify-between gap-2 mb-3">
                         <div class="flex items-center gap-2.5">
-                            <div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-200 font-mono">
+                            <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 font-bold text-xs flex items-center justify-center border border-blue-200 font-mono">
                                 ${student.avatar || student.sbd.slice(-2)}
                             </div>
                             <div>
                                 <h4 class="font-bold text-sm text-slate-900 leading-tight">${student.name}</h4>
-                                <span class="font-mono text-xs text-slate-400">${student.sbd}</span>
+                                <div class="flex items-center gap-2 text-xs">
+                                    <span class="font-mono text-slate-500">${student.sbd}</span>
+                                    <span class="text-slate-300">&bull;</span>
+                                    <span class="text-slate-400 text-[11px]">${student.dob || ''}</span>
+                                </div>
                             </div>
                         </div>
                         ${statusBadge}
@@ -357,7 +393,7 @@ class TeacherDashboardController {
 
                 <!-- Footer thẻ -->
                 <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
-                    <span>Vi phạm: <strong class="${student.warnings > 0 ? 'text-rose-600' : 'text-slate-600'}">${student.warnings || 0}/3</strong></span>
+                    <span>Vi phạm: <strong class="${student.warnings > 0 ? 'text-rose-600' : 'text-emerald-600 font-bold'}">${student.warnings || 0}/3</strong></span>
                     <span class="text-blue-600 font-medium hover:underline">Chi tiết &rarr;</span>
                 </div>
             </div>
@@ -396,7 +432,7 @@ class TeacherDashboardController {
 
         if (drawer && overlay) {
             document.getElementById('drawer-student-name').textContent = student.name;
-            document.getElementById('drawer-student-sbd').textContent = student.sbd;
+            document.getElementById('drawer-student-sbd').textContent = `${student.sbd} (Ngày sinh: ${student.dob || '---'})`;
             document.getElementById('drawer-student-status').textContent = student.status.toUpperCase();
             document.getElementById('drawer-student-progress').textContent = `${student.progress || 0}%`;
             document.getElementById('drawer-student-warnings').textContent = `${student.warnings || 0}/3`;
@@ -422,7 +458,7 @@ class TeacherDashboardController {
                         this.saveStudentsToStorage();
                         this.renderSingleCard(student);
                         this.updateStatsCounters();
-                        alert(`Đã gửi lệnh MỞ KHÓA bài thi cho học sinh ${student.name} (${student.sbd})!`);
+                        alert(`Đã mở khóa và xóa vi phạm cho học sinh ${student.name} (${student.sbd})!`);
                         this.closeDrawer();
                     };
                 } else {
@@ -470,7 +506,6 @@ class TeacherDashboardController {
         const fileInput = document.getElementById('excel-file-input');
 
         if (dropzone && fileInput) {
-            // Drag over / leave
             ['dragenter', 'dragover'].forEach(eventName => {
                 dropzone.addEventListener(eventName, (e) => {
                     e.preventDefault();
@@ -487,7 +522,6 @@ class TeacherDashboardController {
                 });
             });
 
-            // Handle Drop
             dropzone.addEventListener('drop', (e) => {
                 const files = e.dataTransfer.files;
                 if (files.length > 0) {
@@ -495,7 +529,6 @@ class TeacherDashboardController {
                 }
             });
 
-            // Handle File Choose
             fileInput.addEventListener('change', (e) => {
                 if (e.target.files.length > 0) {
                     this.processExcelFile(e.target.files[0]);
@@ -503,15 +536,14 @@ class TeacherDashboardController {
             });
         }
 
-        // Nút nạp lại dữ liệu 47 học sinh 10A3
-        const load10A3Btn = document.getElementById('btn-load-sample-10a3');
-        if (load10A3Btn) {
-            load10A3Btn.onclick = () => {
-                this.students = generateFullClass10A3();
-                this.saveStudentsToStorage();
+        // Nút nạp lại dữ liệu chuẩn 41 học sinh 11A1
+        const load11A1Btn = document.getElementById('btn-load-sample-11a1');
+        if (load11A1Btn) {
+            load11A1Btn.onclick = () => {
+                this.loadInitialClassData();
                 this.renderClassTable();
-                this.updateStatsCounters();
-                alert("Đã nạp thành công danh sách 47 học sinh lớp 10A3!");
+                this.renderLiveMonitorGrid();
+                alert("Đã cập nhật danh sách 41 học sinh Lớp 11A1 và làm sạch dữ liệu vi phạm!");
             };
         }
 
@@ -552,45 +584,60 @@ class TeacherDashboardController {
             return;
         }
 
-        // Dòng đầu tiên là header: STT, Mã định danh/SBD, Họ và tên, Lớp...
-        const header = rows[0].map(h => (h || '').toString().toLowerCase());
-        const sbdIdx = header.findIndex(h => h.includes('sbd') || h.includes('mã') || h.includes('id'));
-        const nameIdx = header.findIndex(h => h.includes('tên') || h.includes('họ'));
-
         const newStudents = [];
-        for (let i = 1; i < rows.length; i++) {
+        let sttCounter = 1;
+
+        for (let i = 0; i < rows.length; i++) {
             const row = rows[i];
             if (!row || row.length === 0) continue;
 
-            const sbd = row[sbdIdx !== -1 ? sbdIdx : 1] || `SBD${1000 + i}`;
-            const name = row[nameIdx !== -1 ? nameIdx : 2] || `Học sinh ${i}`;
-            const password = Math.random().toString(36).slice(-6); // Sinh mật khẩu ngẫu nhiên 6 ký tự
+            const rowStr = row.join(' ').toLowerCase();
+            if (rowStr.includes('stt') || rowStr.includes('họ và tên') || rowStr.trim() === '') continue;
+
+            let stt = row[0];
+            let name = row[1];
+            let dob = row[2] || '';
+
+            // Nếu file có dạng: STT, Họ đệm, Tên, Ngày sinh
+            if (row.length >= 4 && isNaN(row[2])) {
+                name = `${row[1]} ${row[2]}`.trim();
+                dob = row[3] || '';
+            }
+
+            if (!name || name.trim() === '') continue;
+
+            const sbd = `11A1` + (sttCounter < 10 ? `0${sttCounter}` : `${sttCounter}`);
+            const password = Math.random().toString(36).slice(-6);
 
             newStudents.push({
-                sbd: sbd.toString().trim(),
+                stt: sttCounter,
+                sbd: sbd,
                 name: name.toString().trim(),
+                dob: dob.toString().trim(),
                 password: password,
-                status: 'offline',
+                status: 'active',
                 warnings: 0,
                 progress: 0,
                 pin: '889966',
                 avatar: name.slice(0, 2)
             });
+            sttCounter++;
         }
 
         if (newStudents.length > 0) {
             this.students = newStudents;
             this.saveStudentsToStorage();
             this.renderClassTable();
+            this.renderLiveMonitorGrid();
             this.updateStatsCounters();
-            alert(`Đã nhập thành công ${newStudents.length} học sinh và sinh tài khoản tự động!`);
+            alert(`Đã nhập thành công ${newStudents.length} học sinh Lớp 11A1 sạch dữ liệu vi phạm!`);
         }
     }
 
     renderClassTable() {
         const tbody = document.getElementById('class-student-table-body');
         const countBadge = document.getElementById('class-count-badge');
-        if (countBadge) countBadge.textContent = `${this.students.length} học sinh`;
+        if (countBadge) countBadge.textContent = `${this.students.length} học sinh (Lớp 11A1)`;
 
         if (!tbody) return;
 
@@ -599,19 +646,17 @@ class TeacherDashboardController {
                 <td class="py-3 px-4 font-mono text-slate-500">${idx + 1}</td>
                 <td class="py-3 px-4 font-mono font-bold text-slate-800">${s.sbd}</td>
                 <td class="py-3 px-4 font-semibold text-slate-900">${s.name}</td>
+                <td class="py-3 px-4 text-slate-500">${s.dob || '---'}</td>
                 <td class="py-3 px-4">
                     <span class="inline-block px-2 py-0.5 rounded font-mono bg-slate-100 text-slate-700 font-medium">
-                        ${s.password || 'chem2026'}
+                        ${s.password || 'chem11A1'}
                     </span>
                 </td>
                 <td class="py-3 px-4 font-mono text-blue-600 font-bold">${s.pin}</td>
                 <td class="py-3 px-4">
-                    <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold ${
-                        s.status === 'active' ? 'bg-emerald-100 text-emerald-800' :
-                        s.status === 'locked' ? 'bg-rose-100 text-rose-800' :
-                        s.status === 'submitted' ? 'bg-indigo-100 text-indigo-800' :
-                        'bg-slate-100 text-slate-600'
-                    }">${s.status.toUpperCase()}</span>
+                    <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800">
+                        AN TOÀN (0 vi phạm)
+                    </span>
                 </td>
             </tr>
         `).join('');
@@ -627,17 +672,19 @@ class TeacherDashboardController {
             "STT": idx + 1,
             "Số Báo Danh (SBD)": s.sbd,
             "Họ và Tên": s.name,
+            "Ngày sinh": s.dob || "",
             "Tên đăng nhập": s.sbd,
-            "Mật khẩu": s.password || "chem2026",
+            "Mật khẩu": s.password || "chem11A1",
             "Mã PIN Đề thi": s.pin,
-            "Thời gian thi": "50 phút",
-            "Trạng thái": s.status
+            "Lớp": "11A1",
+            "Số lần vi phạm": 0,
+            "Trạng thái": "Sẵn sàng"
         }));
 
         const ws = window.XLSX.utils.json_to_sheet(data);
         const wb = window.XLSX.utils.book_new();
-        window.XLSX.utils.book_append_sheet(wb, ws, "DanhSachTaiKhoan_10A3");
-        window.XLSX.writeFile(wb, "Danh_sach_tai_khoan_thi_Hoa_10A3.xlsx");
+        window.XLSX.utils.book_append_sheet(wb, ws, "DanhSach_11A1");
+        window.XLSX.writeFile(wb, "Danh_sach_tai_khoan_thi_Hoa_11A1.xlsx");
     }
 }
 

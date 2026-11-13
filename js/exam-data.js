@@ -14,7 +14,7 @@ const EXAM_METADATA = {
     title: "KIỂM TRA ĐÁNH GIÁ ĐỊNH KỲ MÔN HÓA HỌC",
     subtitle: "Cấu trúc đề minh họa theo Công văn 7991 - Bộ Giáo dục và Đào tạo",
     subject: "Hóa học",
-    grade: "THPT - Chuẩn IUPAC 2018",
+    grade: "Lớp 11A1 - Chuẩn IUPAC 2018",
     durationMinutes: 50,
     totalPoints: 10.0,
     pin: "889966", // Mã PIN 6 số truy cập đề thi
@@ -307,62 +307,58 @@ const EXAM_QUESTIONS = {
     ]
 };
 
-// Dữ liệu mock ban đầu cho học sinh lớp 10A3 (47 học sinh)
-const INITIAL_STUDENTS_10A3 = [
-    { sbd: "10A301", name: "Nguyễn Hoàng An", status: "active", warnings: 0, progress: 85, pin: "889966", currentQuestion: 16, lastEssaySnippet: "ΔrH°298 = [612 + 4(414) + 436] - [347 + 6(414)] = -127 kJ...", avatar: "NH" },
-    { sbd: "10A302", name: "Trần Mai Anh", status: "active", warnings: 0, progress: 90, pin: "889966", currentQuestion: 18, lastEssaySnippet: "2KMnO4 + 10FeSO4 + 8H2SO4 -> K2SO4 + 5Fe2(SO4)3...", avatar: "TM" },
-    { sbd: "10A303", name: "Lê Quốc Bảo", status: "blur", warnings: 1, progress: 65, pin: "889966", currentQuestion: 11, lastEssaySnippet: "Đang chuyển qua phần tự luận...", avatar: "LQ" },
-    { sbd: "10A304", name: "Phạm Gia Bảo", status: "active", warnings: 0, progress: 75, pin: "889966", currentQuestion: 14, lastEssaySnippet: "", avatar: "PG" },
-    { sbd: "10A305", name: "Đỗ Ngọc Bích", status: "active", warnings: 0, progress: 95, pin: "889966", currentQuestion: 19, lastEssaySnippet: "CTPT: C3H8O. Tên IUPAC: propan-1-ol và propan-2-ol", avatar: "DN" },
-    { sbd: "10A306", name: "Vũ Đình Chiến", status: "locked", warnings: 3, progress: 40, pin: "889966", currentQuestion: 8, lastEssaySnippet: "[Bị khóa bài do chuyển tab quá 3 lần]", avatar: "VD" },
-    { sbd: "10A307", name: "Bùi Thùy Dung", status: "active", warnings: 0, progress: 80, pin: "889966", currentQuestion: 15, lastEssaySnippet: "", avatar: "BT" },
-    { sbd: "10A308", name: "Ngô Quang Dũng", status: "blur", warnings: 2, progress: 55, pin: "889966", currentQuestion: 10, lastEssaySnippet: "Đang gõ công thức...", avatar: "NQ" },
-    { sbd: "10A309", name: "Hoàng Khánh Đan", status: "active", warnings: 0, progress: 88, pin: "889966", currentQuestion: 17, lastEssaySnippet: "Phản ứng tỏa nhiệt vì Delta H < 0", avatar: "HK" },
-    { sbd: "10A310", name: "Phan Văn Đạt", status: "offline", warnings: 0, progress: 0, pin: "889966", currentQuestion: 0, lastEssaySnippet: "Chưa tham gia", avatar: "PV" },
-    { sbd: "10A311", name: "Lý Mỹ Duyên", status: "active", warnings: 0, progress: 70, pin: "889966", currentQuestion: 13, lastEssaySnippet: "", avatar: "LM" },
-    { sbd: "10A312", name: "Dương Minh Đức", status: "active", warnings: 0, progress: 82, pin: "889966", currentQuestion: 16, lastEssaySnippet: "ΔrH°298 = -127 kJ", avatar: "DM" }
+// DANH SÁCH 41 HỌC SINH LỚP 11A1 (ĐÃ XÓA TOÀN BỘ VI PHẠM: warnings = 0)
+const INITIAL_STUDENTS_11A1 = [
+    { stt: 1, sbd: "11A101", name: "Nguyễn Minh An", dob: "09/08/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "NA" },
+    { stt: 2, sbd: "11A102", name: "Trần Nữ Gia Anh", dob: "22/06/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TA" },
+    { stt: 3, sbd: "11A103", name: "Trần Lâm Hoài Ân", dob: "22/06/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TÂ" },
+    { stt: 4, sbd: "11A104", name: "Nguyễn Công Danh", dob: "14/09/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "ND" },
+    { stt: 5, sbd: "11A105", name: "Nguyễn Châu Quốc Duy", dob: "23/12/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "ND" },
+    { stt: 6, sbd: "11A106", name: "Đặng Văn Đạt", dob: "29/03/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "ĐĐ" },
+    { stt: 7, sbd: "11A107", name: "Trần Quốc Hào", dob: "07/01/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TH" },
+    { stt: 8, sbd: "11A108", name: "Dương Gia Hân", dob: "12/10/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "DH" },
+    { stt: 9, sbd: "11A109", name: "Lê Gia Hùng", dob: "29/09/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "LH" },
+    { stt: 10, sbd: "11A110", name: "Nguyễn Lê Quốc Hùng", dob: "01/01/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "NH" },
+    { stt: 11, sbd: "11A111", name: "Trần Nguyễn Anh Khôi", dob: "02/09/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TK" },
+    { stt: 12, sbd: "11A112", name: "Trương Quỳnh Mai", dob: "03/03/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TM" },
+    { stt: 13, sbd: "11A113", name: "Lê Hoàng My", dob: "03/02/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "LM" },
+    { stt: 14, sbd: "11A114", name: "Võ Nhật Nam", dob: "20/08/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "VN" },
+    { stt: 15, sbd: "11A115", name: "Trần Khánh Ngân", dob: "09/03/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TN" },
+    { stt: 16, sbd: "11A116", name: "Võ Thị Thu Ngân", dob: "07/10/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "VN" },
+    { stt: 17, sbd: "11A117", name: "Lê Yến Nhi", dob: "20/07/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "LN" },
+    { stt: 18, sbd: "11A118", name: "Phạm Ngọc Thảo Nhi", dob: "21/03/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "PN" },
+    { stt: 19, sbd: "11A119", name: "Trần Ngọc Yến Oanh", dob: "06/11/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TO" },
+    { stt: 20, sbd: "11A120", name: "Trần Ngọc Phúc", dob: "30/03/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TP" },
+    { stt: 21, sbd: "11A121", name: "Nguyễn Thị Kim Phụng", dob: "03/08/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "NP" },
+    { stt: 22, sbd: "11A122", name: "Đỗ Vũ Kim Phượng", dob: "27/06/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "ĐP" },
+    { stt: 23, sbd: "11A123", name: "Nguyễn Thị Thúy Quyên", dob: "10/04/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "NQ" },
+    { stt: 24, sbd: "11A124", name: "Nguyễn Thị Như Quỳnh", dob: "10/09/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "NQ" },
+    { stt: 25, sbd: "11A125", name: "Trần Lê Bảo Quỳnh", dob: "08/02/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TQ" },
+    { stt: 26, sbd: "11A126", name: "Nguyễn Cao Sang", dob: "02/11/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "NS" },
+    { stt: 27, sbd: "11A127", name: "Võ Nguyễn Minh Sơn", dob: "01/12/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "VS" },
+    { stt: 28, sbd: "11A128", name: "Huỳnh Đặng Thanh Thảo", dob: "31/07/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "HT" },
+    { stt: 29, sbd: "11A129", name: "Huỳnh Bảo Thi", dob: "04/10/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "HT" },
+    { stt: 30, sbd: "11A130", name: "Hồ Hữu Kim Thiên", dob: "14/06/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "HT" },
+    { stt: 31, sbd: "11A131", name: "Cao Tấn Thịnh", dob: "20/05/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "CT" },
+    { stt: 32, sbd: "11A132", name: "Nguyễn Thị Ngọc Thịnh", dob: "12/12/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "NT" },
+    { stt: 33, sbd: "11A133", name: "Nguyễn Võ Cát Tiên", dob: "19/04/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "NT" },
+    { stt: 34, sbd: "11A134", name: "Phạm Thị Thùy Trang", dob: "22/03/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "PT" },
+    { stt: 35, sbd: "11A135", name: "Trần Phạm Thanh Trúc", dob: "09/08/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TT" },
+    { stt: 36, sbd: "11A136", name: "Dương Trần Duy Tùng", dob: "25/07/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "DT" },
+    { stt: 37, sbd: "11A137", name: "Lê Phương Uyên", dob: "16/04/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "LU" },
+    { stt: 38, sbd: "11A138", name: "Nguyễn Lương Ngọc Uyên", dob: "11/02/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "NU" },
+    { stt: 39, sbd: "11A139", name: "Bùi Nguyễn Thi Vũ", dob: "02/01/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "BV" },
+    { stt: 40, sbd: "11A140", name: "Nguyễn Ngọc Bích Vy", dob: "21/04/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "NV" },
+    { stt: 41, sbd: "11A141", name: "Trần Thị Phương Vy", dob: "07/07/2010", status: "active", warnings: 0, progress: 0, pin: "889966", avatar: "TV" }
 ];
 
-// Helper để tạo thêm danh sách đầy đủ 47 học sinh nếu cần
-function generateFullClass10A3() {
-    const list = [...INITIAL_STUDENTS_10A3];
-    const familyNames = ["Trịnh", "Lâm", "Hà", "Đặng", "Võ", "Đinh", "Trương", "Lương", "Tạ", "Vương", "Đoàn"];
-    const midNames = ["Thị", "Văn", "Đức", "Thanh", "Minh", "Hồng", "Gia", "Tuấn", "Phương"];
-    const lastNames = ["Huy", "Khoa", "Lâm", "Mai", "Nam", "Nga", "Phong", "Quân", "Sơn", "Tâm", "Thảo", "Uyên", "Vinh", "Xuân", "Yến"];
-
-    for (let i = 13; i <= 47; i++) {
-        const sbd = "10A3" + (i < 10 ? "0" + i : i);
-        const fname = familyNames[(i * 3) % familyNames.length];
-        const mname = midNames[(i * 2) % midNames.length];
-        const lname = lastNames[i % lastNames.length];
-        const fullName = `${fname} ${mname} ${lname}`;
-        const initials = `${fname[0]}${lname[0]}`;
-        
-        let status = "active";
-        let warnings = 0;
-        let progress = Math.min(100, Math.floor(40 + (i * 7) % 58));
-        if (i % 9 === 0) {
-            status = "blur";
-            warnings = 1;
-        } else if (i === 22) {
-            status = "locked";
-            warnings = 3;
-        } else if (i % 11 === 0) {
-            status = "offline";
-            progress = 0;
-        }
-
-        list.push({
-            sbd,
-            name: fullName,
-            status,
-            warnings,
-            progress,
-            pin: "889966",
-            currentQuestion: Math.floor(progress / 5.5),
-            lastEssaySnippet: progress > 60 ? "Lời giải tự luận học sinh đang viết..." : "",
-            avatar: initials
-        });
-    }
-    return list;
+function generateClass11A1() {
+    return INITIAL_STUDENTS_11A1.map(s => ({
+        ...s,
+        status: "active",
+        warnings: 0,
+        progress: 0,
+        currentQuestion: 1,
+        lastEssaySnippet: ""
+    }));
 }

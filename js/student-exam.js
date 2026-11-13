@@ -186,7 +186,7 @@ class StudentExamController {
 
         // Lắng nghe lệnh từ Giáo viên (Unlock, Force Submit)
         window.proctoringService.subscribe('TEACHER_ACTION', (data) => {
-            if (this.currentStudent && data.targetSbd === this.currentStudent.sbd) {
+            if (this.currentStudent && (data.targetSbd === this.currentStudent.sbd || data.targetSbd === 'ALL')) {
                 if (data.action === 'UNLOCK') {
                     this.unlockExamByTeacher();
                 } else if (data.action === 'FORCE_SUBMIT') {
