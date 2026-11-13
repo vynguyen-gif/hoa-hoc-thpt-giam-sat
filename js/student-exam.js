@@ -31,10 +31,86 @@ class StudentExamController {
         this.bindLoginEvents();
         this.bindProctoringGuards();
         this.bindRealtimeListeners();
+        this.checkAutoLoginFromWaitingRoom();
+    }
+
+    // Helper chuẩn hóa mã đăng nhập (chấp nhận cả 11A1_01, 11A101, 11a1_01)
+    normalizeCode(code) {
+        return (code || '').toString().toUpperCase().replace(/[_\-\s]/g, '');
+    }
+
+    // Tìm học sinh linh hoạt từ Database Local và Initial List
+    findStudent(inputCode) {
+        const norm = this.normalizeCode(inputCode);
+        if (!norm) return null;
+
+        // 1. Tìm trong supabase_students_db (nơi giáo viên vừa tạo mật khẩu riêng)
+        try {
+            const localDb = JSON.parse(localStorage.getItem('supabase_students_db') || '[]');
+            const found = localDb.find(s => {
+                const uNorm = this.normalizeCode(s.username || s.sbd);
+                return uNorm === norm;
+            });
+            if (found) {
+                return {
+                    sbd: found.username || found.sbd,
+                    name: found.ho_ten || found.name,
+                    password: (found.password || '').toString().trim(),
+                    raw: found
+                };
+            }
+        } catch (e) {
+            console.warn(e);
+        }
+
+        // 2. Tìm trong INITIAL_STUDENTS_11A1
+        if (typeof INITIAL_STUDENTS_11A1 !== 'undefined') {
+            const found = INITIAL_STUDENTS_11A1.find(s => {
+                const sNorm = this.normalizeCode(s.sbd);
+                return sNorm === norm;
+            });
+            if (found) {
+                return {
+                    sbd: found.sbd,
+                    name: found.name,
+                    password: (found.password || '').toString().trim(),
+                    raw: found
+                };
+            }
+        }
+
+        return null;
+    }
+
+    // Kiểm tra nếu học sinh vào từ phòng chờ phong-cho.html
+    checkAutoLoginFromWaitingRoom() {
+        const params = new URLSearchParams(window.location.search);
+        const userParam = params.get('user');
+        const sessionRaw = localStorage.getItem('current_student_session');
+
+        if (sessionRaw && userParam) {
+            try {
+                const session = JSON.parse(sessionRaw);
+                const sbdInput = document.getElementById('student-sbd-input');
+                const nameInput = document.getElementById('student-name-input');
+                const passInput = document.getElementById('student-pass-input');
+
+                if (sbdInput) sbdInput.value = session.username || userParam;
+                if (nameInput) nameInput.value = session.name || '';
+                
+                // Tự động điền pass nếu có
+                const matched = this.findStudent(session.username || userParam);
+                if (matched && passInput) {
+                    passInput.value = matched.password;
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
     }
 
     // ==========================================
-    // 1. URL OBFUSCATION & AUTHENTICATION (6-DIGIT PIN + USERNAME)
+    // 1. URL OBFUSCATION & AUTHENTICATION
     // ==========================================
     bindLoginEvents() {
         const loginForm = document.getElementById('student-login-form');
@@ -51,16 +127,14 @@ class StudentExamController {
             });
         }
 
-        // Tự động tìm tên học sinh khi gõ SBD
+        // Tự động tìm tên học sinh khi gõ SBD hoặc Username
         if (sbdInput) {
             sbdInput.addEventListener('input', (e) => {
-                const sbd = e.target.value.trim().toUpperCase();
-                const matched = INITIAL_STUDENTS_11A1.find(s => s.sbd === sbd);
+                const val = e.target.value.trim();
+                const matched = this.findStudent(val);
                 if (matched && nameInput) {
                     nameInput.value = matched.name;
-                    if (passInput && !passInput.value) {
-                        passInput.placeholder = `Mật khẩu riêng của ${matched.name}`;
-                    }
+                    if (loginError) loginError.classList.add('hidden');
                 }
             });
         }
@@ -68,35 +142,36 @@ class StudentExamController {
         if (loginForm) {
             loginForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-                const pin = pinInput.value.trim();
-                const sbd = sbdInput.value.trim().toUpperCase();
-                const password = passInput ? passInput.value.trim() : '';
+                const pin = pinInput ? pinInput.value.trim() : '';
+                const sbdVal = sbdInput ? sbdInput.value.trim() : '';
+                const passwordVal = passInput ? passInput.value.trim() : '';
 
                 if (pin !== this.metadata.pin) {
-                    this.showLoginError(`Mã PIN "${pin}" không đúng! Mã đề thi yêu cầu là ${this.metadata.pin}`);
+                    this.showLoginError(`Mã PIN "${pin}" không đúng! Mã PIN đề thi là ${this.metadata.pin}`);
                     return;
                 }
 
-                if (!sbd) {
-                    this.showLoginError("Vui lòng nhập Số báo danh (SBD)!");
+                if (!sbdVal) {
+                    this.showLoginError("Vui lòng nhập Tên đăng nhập / Số báo danh (SBD)!");
                     return;
                 }
 
-                // Kiểm tra SBD trong danh sách lớp 11A1
-                const matchedStudent = INITIAL_STUDENTS_11A1.find(s => s.sbd === sbd);
+                // Tìm học sinh (chấp nhận cả 11A1_01 và 11A101)
+                const matchedStudent = this.findStudent(sbdVal);
                 if (!matchedStudent) {
-                    this.showLoginError(`Số báo danh "${sbd}" không tồn tại trong danh sách lớp 11A1!`);
+                    this.showLoginError(`Tài khoản "${sbdVal}" không tồn tại trong danh sách lớp 11A1! Vui lòng kiểm tra lại Username (VD: 11A1_01).`);
                     return;
                 }
 
-                // Kiểm tra Mật khẩu riêng của học sinh
-                if (matchedStudent.password && password !== matchedStudent.password) {
-                    this.showLoginError(`Mật khẩu không chính xác cho SBD ${sbd} (${matchedStudent.name})! Vui lòng kiểm tra lại mật khẩu riêng của bạn.`);
+                // Kiểm tra Mật khẩu riêng
+                if (matchedStudent.password && passwordVal !== matchedStudent.password) {
+                    this.showLoginError(`Mật khẩu không chính xác cho thí sinh ${matchedStudent.name} (${sbdVal})! Vui lòng nhập đúng mật khẩu riêng được cấp.`);
                     return;
                 }
 
-                const name = matchedStudent.name;
-                this.startSession(sbd, name, pin);
+                const finalSbd = matchedStudent.sbd;
+                const finalName = matchedStudent.name;
+                this.startSession(finalSbd, finalName, pin);
             });
         }
     }
@@ -104,8 +179,11 @@ class StudentExamController {
     showLoginError(msg) {
         const el = document.getElementById('student-login-error');
         if (el) {
-            el.textContent = msg;
+            el.innerHTML = `<strong>Lỗi:</strong> ${msg}`;
             el.classList.remove('hidden');
+            el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+            alert(msg);
         }
     }
 
@@ -126,7 +204,6 @@ class StudentExamController {
                 if (parsed.timerSeconds && parsed.timerSeconds > 0) {
                     this.timerSeconds = parsed.timerSeconds;
                 }
-                console.log("[AutoSave] Khôi phục bài làm thành công cho SBD:", sbd);
             } catch (err) {
                 console.error("Lỗi parse bài làm cũ:", err);
             }
@@ -141,7 +218,7 @@ class StudentExamController {
         });
 
         // Ẩn màn hình đăng nhập, hiện modal Toàn màn hình
-        document.getElementById('student-login-view').classList.add('hidden');
+        document.getElementById('student-login-view')?.classList.add('hidden');
         this.showFullscreenPrompt();
     }
 
@@ -199,7 +276,6 @@ class StudentExamController {
 
         window.addEventListener('blur', () => {
             if (this.isExamStarted && !this.isSubmitted && document.fullscreenElement) {
-                // Focus mất sang cửa sổ khác
                 this.recordViolation("Chuyển tiêu điểm ra ngoài màn hình làm bài");
             }
         });
@@ -247,17 +323,15 @@ class StudentExamController {
                 await document.documentElement.requestFullscreen();
             }
         } catch (err) {
-            console.warn("Fullscreen API failed or user denied:", err);
-            // Trong môi trường sandbox iframe vẫn cho phép làm bài nhưng bật cảnh báo
+            console.warn("Fullscreen API fallback:", err);
         }
 
         const modal = document.getElementById('fullscreen-prompt-modal');
         if (modal) modal.classList.add('hidden');
 
-        document.getElementById('student-focus-mode-view').classList.remove('hidden');
+        document.getElementById('student-focus-mode-view')?.classList.remove('hidden');
         this.isExamStarted = true;
 
-        // Cập nhật watermark bảo mật
         const examContainer = document.getElementById('student-focus-mode-view');
         if (examContainer && this.currentStudent) {
             examContainer.setAttribute('data-watermark', `${this.currentStudent.sbd} - ${this.currentStudent.name}`);
@@ -265,8 +339,6 @@ class StudentExamController {
 
         this.renderExamInterface();
         this.startTimer();
-
-        // Gửi trạng thái ban đầu lên monitor
         this.broadcastProgress('active');
     }
 
@@ -274,12 +346,8 @@ class StudentExamController {
         if (this.isExamLocked || this.isSubmitted) return;
 
         this.warningsCount++;
-        console.warn(`[VIOLATION #${this.warningsCount}] ${reason}`);
-
-        // Lưu vào LocalStorage
         this.saveToLocalStorage();
 
-        // Bắn tín hiệu sang Teacher Live Monitor
         window.proctoringService.publish('STUDENT_BLUR', {
             sbd: this.currentStudent.sbd,
             name: this.currentStudent.name,
@@ -311,9 +379,7 @@ class StudentExamController {
                     if (!document.fullscreenElement) {
                         await document.documentElement.requestFullscreen();
                     }
-                } catch (e) {
-                    console.log(e);
-                }
+                } catch (e) {}
                 modal.classList.add('hidden');
                 this.broadcastProgress('active');
             };
@@ -324,16 +390,9 @@ class StudentExamController {
         this.isExamLocked = true;
         clearInterval(this.timerInterval);
 
-        // Đóng modal cảnh báo nếu mở
         document.getElementById('violation-warning-modal')?.classList.add('hidden');
+        document.getElementById('exam-locked-screen')?.classList.remove('hidden');
 
-        // Bật màn hình đỏ khóa bài
-        const lockScreen = document.getElementById('exam-locked-screen');
-        if (lockScreen) {
-            lockScreen.classList.remove('hidden');
-        }
-
-        // Bắn tín hiệu LOCKED
         window.proctoringService.publish('STUDENT_LOCK', {
             sbd: this.currentStudent.sbd,
             name: this.currentStudent.name,
@@ -364,7 +423,6 @@ class StudentExamController {
     // 3. UI RENDERING & QUESTION NAVIGATION
     // ==========================================
     renderExamInterface() {
-        // Cập nhật thông tin thí sinh trên header
         const sbdEl = document.getElementById('header-student-sbd');
         const nameEl = document.getElementById('header-student-name');
         if (sbdEl) sbdEl.textContent = this.currentStudent.sbd;
@@ -660,7 +718,6 @@ class StudentExamController {
     selectPart1Choice(qId, optionId, index) {
         this.answers.part1[qId] = optionId;
         this.saveToLocalStorage();
-        this.updateQuestionCardStatus(index);
         this.renderQuestionGrid();
         this.broadcastProgress('active');
     }
@@ -671,7 +728,6 @@ class StudentExamController {
         }
         this.answers.part2[qId][itemId] = boolVal;
         this.saveToLocalStorage();
-        this.updateQuestionCardStatus(index);
         this.renderQuestionGrid();
         this.broadcastProgress('active');
     }
@@ -684,14 +740,13 @@ class StudentExamController {
         this.saveToLocalStorage();
         this.renderQuestionGrid();
 
-        // Gửi stream tiến độ gõ tự luận về Live Monitor của Giáo viên (như Google Docs)
         clearTimeout(this.keystrokeDebounce);
         this.keystrokeDebounce = setTimeout(() => {
             window.proctoringService.publish('STUDENT_ESSAY_KEYSTROKE', {
                 sbd: this.currentStudent.sbd,
                 name: this.currentStudent.name,
                 questionId: qId,
-                snippet: val.slice(-120), // 120 ký tự gần nhất
+                snippet: val.slice(-120),
                 fullText: val,
                 time: new Date().toLocaleTimeString()
             });
@@ -745,18 +800,13 @@ class StudentExamController {
     }
 
     calculateProgress() {
-        let totalItems = 12 + (4 * 4) + 3; // 12 + 16 + 3 = 31 items
+        let totalItems = 12 + (4 * 4) + 3;
         let completed = 0;
 
-        // Part 1: 12 câu
         completed += Object.keys(this.answers.part1).length;
-
-        // Part 2: 16 items
         Object.values(this.answers.part2).forEach(obj => {
             completed += Object.keys(obj).length;
         });
-
-        // Part 3: 3 câu
         Object.values(this.answers.part3).forEach(obj => {
             if (obj && (obj.text?.trim()?.length > 5 || obj.images?.length > 0)) {
                 completed += 1;
@@ -793,14 +843,13 @@ class StudentExamController {
                 this.timerSeconds--;
                 this.updateTimerDisplay();
 
-                // Lưu lại tiến độ mỗi 15 giây
                 if (this.timerSeconds % 15 === 0) {
                     this.saveToLocalStorage();
                     this.broadcastProgress('active');
                 }
             } else {
                 clearInterval(this.timerInterval);
-                this.submitExam(true); // Tự động nộp khi hết giờ
+                this.submitExam(true);
             }
         }, 1000);
     }
@@ -815,7 +864,6 @@ class StudentExamController {
 
         timerEl.textContent = formatted;
 
-        // Cảnh báo khi thời gian dưới 5 phút
         const container = document.getElementById('timer-badge-container');
         if (container) {
             if (this.timerSeconds <= 300) {
@@ -845,10 +893,6 @@ class StudentExamController {
         if (currentBtn) {
             currentBtn.classList.add('ring-2', 'ring-blue-600', 'ring-offset-1');
         }
-    }
-
-    updateQuestionCardStatus(index) {
-        // Visual updates when choice selected
     }
 
     // ==========================================
@@ -882,12 +926,10 @@ class StudentExamController {
         this.isSubmitted = true;
         clearInterval(this.timerInterval);
 
-        // Thoát Fullscreen
         if (document.fullscreenElement) {
             document.exitFullscreen().catch(() => {});
         }
 
-        // Bắn tín hiệu Nộp bài sang Teacher Live Monitor
         window.proctoringService.publish('STUDENT_SUBMIT', {
             sbd: this.currentStudent.sbd,
             name: this.currentStudent.name,
@@ -897,7 +939,6 @@ class StudentExamController {
             submittedAt: new Date().toLocaleTimeString()
         });
 
-        // Ẩn giao diện làm bài, hiển thị màn hình kết quả hoàn thành
         document.getElementById('student-focus-mode-view')?.classList.add('hidden');
         const completeView = document.getElementById('student-complete-view');
         if (completeView) {

@@ -353,6 +353,19 @@
             // Lưu vào LocalStore DB (và Supabase nếu có client)
             localStorage.setItem('supabase_students_db', JSON.stringify(students));
 
+            // Đồng bộ sang Live Monitor của Giáo viên
+            const monitorStudents = students.map(s => ({
+                sbd: s.username,
+                name: s.ho_ten,
+                password: s.password,
+                status: 'active',
+                warnings: 0,
+                progress: 0,
+                pin: s.pin,
+                avatar: s.ho_ten.slice(0, 2)
+            }));
+            localStorage.setItem('chem_teacher_students_11a1', JSON.stringify(monitorStudents));
+
             statusEl.className = 'mt-4 p-3 rounded-xl text-xs font-medium bg-emerald-50 border border-emerald-200 text-emerald-800';
             statusEl.innerHTML = `
                 <div class="flex items-center gap-2">

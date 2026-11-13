@@ -10,6 +10,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Exam Data Fallback -->
+    <script src="js/exam-data.js"></script>
 </head>
 <body class="bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 text-slate-100 min-h-screen flex items-center justify-center p-4">
 
@@ -130,18 +132,40 @@
                     }
                 }
 
+                const norm = username.toUpperCase().replace(/[_\-\s]/g, '');
+
                 // 2. Fallback sang LocalStore DB
                 if (!studentData) {
                     const localStudents = JSON.parse(localStorage.getItem('supabase_students_db') || '[]');
-                    const found = localStudents.find(s => s.username.toLowerCase() === username.toLowerCase() && s.password === password);
+                    const found = localStudents.find(s => {
+                        const uNorm = (s.username || s.sbd || '').toString().toUpperCase().replace(/[_\-\s]/g, '');
+                        return uNorm === norm && s.password.toString().trim() === password;
+                    });
                     if (found) {
                         studentData = found;
                     }
                 }
 
-                // 3. Xử lý kết quả xác thực
+                // 3. Fallback sang INITIAL_STUDENTS_11A1
+                if (!studentData && typeof INITIAL_STUDENTS_11A1 !== 'undefined') {
+                    const found = INITIAL_STUDENTS_11A1.find(s => {
+                        const sNorm = (s.sbd || '').toString().toUpperCase().replace(/[_\-\s]/g, '');
+                        return sNorm === norm && s.password.toString().trim() === password;
+                    });
+                    if (found) {
+                        studentData = {
+                            id: found.sbd,
+                            ho_ten: found.name,
+                            ten_lop: '11A1',
+                            username: found.sbd,
+                            password: found.password
+                        };
+                    }
+                }
+
+                // 4. Xử lý kết quả xác thực
                 if (!studentData) {
-                    showAlert('Tên đăng nhập hoặc Mật khẩu không chính xác!', 'error');
+                    showAlert('Tên đăng nhập hoặc Mật khẩu không chính xác! Vui lòng nhập đúng mật khẩu riêng được cấp (chú ý chữ hoa/thường, ký tự @).', 'error');
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = `<span>Vào Phòng Thi</span> <i data-lucide="arrow-right" class="w-4 h-4"></i>`;
                     if (window.lucide) window.lucide.createIcons();
