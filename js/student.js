@@ -7,11 +7,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const bus = new ChemSyncChannel("student");
     const students = bus.getStudents();
 
-    // 1. Xác định học sinh hiện tại từ URL query hoặc mặc định là Phạm Văn Danh (2102)
+    // 1. Xác định học sinh hiện tại từ URL query hoặc mặc định là Nguyễn Minh An (1101)
     const urlParams = new URLSearchParams(window.location.search);
-    let currentStudentId = urlParams.get("id") || "2102";
+    let currentStudentId = urlParams.get("id") || "1101";
 
-    let currentStudent = bus.getStudentById(currentStudentId) || students[1];
+    let currentStudent = bus.getStudentById(currentStudentId) || students[0];
 
     // Khởi tạo trạng thái câu trả lời
     let studentAnswers = currentStudent.answers || {};
